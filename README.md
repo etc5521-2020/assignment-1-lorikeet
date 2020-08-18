@@ -1,11 +1,11 @@
 # ETC5521 Assignment 1 
 
-Team name: [FILL]
+Team name: Lorikeet
 
 Team members:
 
-* [FILL]
-* [FILL]
+* Emily Sheehan
+* Aryan Jain
 
 # Steps
 
