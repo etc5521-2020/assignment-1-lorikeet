@@ -19,6 +19,10 @@ output:
 
 # Data description
 
+The data comprises of vaccination rates for 46,412 schools in 32 U.S states and was retrieved from The Wall Street Journal. The variables include; the school academic year, the school's state, city, county, district, name, type, enrollment, MMR (measles, mumps and rubella) vaccination rate, overall vaccination rate, latitude, longitude and the percentage of students exempted from vaccinations due to personal, religious or medical reasons. 
+
+The data was collected in the 2017-18 school year for 11 states and 2018-19 school year for the remaining 21 states. The state health departments provided the vaccination data and the National Center for Education Statistic's provided the school location which was matched against the school name. In the case that there was no match, the school's location was found with Google Maps API. 
+
 # Analysis and findings
 
 [FILL] Should include at least one plot or numerical summary for each of your questions, that helps the reader arrive at an answer. You should also write paragraphs describing the methods, summaries and findings. 
