@@ -39,9 +39,9 @@ The individual state dataset was scraped from WSJ github repository and combined
 
 [FILL] Should include at least one plot or numerical summary for each of your questions, that helps the reader arrive at an answer. You should also write paragraphs describing the methods, summaries and findings. 
 
-# Emily section
+## Emily section
 
-# Aryan section
+## Aryan section
 
 
 # References
