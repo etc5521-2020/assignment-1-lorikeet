@@ -43,5 +43,82 @@ The individual state dataset was scraped from WSJ github repository and combined
 
 # Aryan section
 
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(mapview)
+library(sf)
+library(maps)
+library(ggmap)
+library(ggthemes)
+library(viridis)
+library(mapproj)
+library(tools)
+library(gridExtra)
+```
+
+```{r}
+# Reading the data
+measles <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-25/measles.csv')
+```
+
+## Question 1
+
+```{r}
+# Measles vaccination across all american states and school count
+measles_density <- measles %>%
+  group_by(state) %>%
+  summarise(mmr = mean(mmr),
+            overall = mean(overall),
+            count = n())
+
+# Measles vaccination across state
+measles_states <- measles_density[c("state", "mmr", "overall")] %>%
+  rename(region = state) %>%
+  mutate(region = tolower(region))
+
+```
+
+```{r}
+# Use map_data() to create usa mapping dataframe
+usa <- map_data("state")
+
+# Merging usa map data with measles across state data
+usa_measles_states <- merge(usa, measles_states, all.x = TRUE)
+
+# finding centroids of each state
+states <- st_as_sf(map("state", plot = FALSE, fill = TRUE))
+states <- cbind(states, st_coordinates(st_centroid(states)))
+
+# Merging measles state data and usa map data with centroid data
+usa_measles_states <- merge(usa_measles_states, states[c("ID", "X", "Y")], by.x = "region", by.y = "ID") %>%
+  ungroup() %>%
+  arrange(order)
+```
+
+```{r}
+# MMR accination rate across the states
+mmr_p <- ggplot(usa_measles_states, aes(x = long, y = lat, fill = mmr, group = group)) +
+  geom_polygon(col = "white") +
+  geom_text(aes(X, Y, label = toTitleCase(region)), size = 3) +
+  coord_map() +
+  theme_map() +
+  ggtitle("MMR vaccination rate across states")
+```
+
+```{r}
+# Overall vaccination rate across states
+overall_p <- ggplot(usa_measles_states, aes(x = long, y = lat, fill = overall, group = group)) +
+  geom_polygon(col = "white") +
+  geom_text(aes(X, Y, label = toTitleCase(region)), size = 3) +
+  coord_map() +
+  theme_map() +
+  ggtitle("Overall vaccination rate across states")
+```
+
+```{r}
+# Plotting both plots side by side
+grid.arrange(mmr_p, overall_p, nrow = 1)
+```
 
 # References
