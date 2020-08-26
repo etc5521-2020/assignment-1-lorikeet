@@ -118,7 +118,7 @@ overall_p <- ggplot(usa_measles_states, aes(x = long, y = lat, fill = overall, g
 
 ```{r}
 # Plotting both plots side by side
-grid.arrange(mmr_p, overall_p, nrow = 1)
+grid.arrange(mmr_p, overall_p, ncol = 1)
 ```
 
 # References
