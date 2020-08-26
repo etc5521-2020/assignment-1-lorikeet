@@ -15,7 +15,13 @@ output:
 
 # Introduction and motivation
 
-[FILL] Give the bigger picture of the data, and inspire the reader to learn more about the problem by reading your analysis. 
+Measles is a highly infectious disease caused by the Measles virus. It can lead to pneumonia, infections of the middle ear, swelling of the brain and death.
+
+A vaccine exists to prevent the onset of measles as there is no treatment. The vaccine involves the injection of attenuated measles antigens that stimulate the production of antibodies and memory cells, providing long-term protection against the virus. When administered properly, the vaccine is 90.5% effective within 72 hours of exposure (Barrabeig et al., 2011).
+
+Unfortunately there is a growing number of individuals refusing vaccination, particularly in the US (Phadke et al., 2016). In Texas, the number of unvaccinated children attaining exemptions to attend school has increased by 28 times since 2003 (Sinclair et al., 2019). This has led to several outbreaks of vaccine preventable diseases, such as Measles. If this trend continues, there could be calamitous consequences. 
+
+This paper hopes to understand the reasons for vaccine refusal and determine whether there is a relationship between socio-economic status and vaccination rate. 
 
 # Data description
 
@@ -45,3 +51,16 @@ The individual state dataset was scraped from WSJ github repository and combined
 
 
 # References
+
+## Emily's references (I will fix up in APA)
+measles definition - https://www.health.gov.au/health-topics/measles#what-is-measles
+
+how vaccine works - https://www.health.qld.gov.au/news-events/news/what-is-measles-why-vaccinate#:~:text=The%20measles%20vaccine%20contains%20a,is%20better%20prepared%20to%20respond.
+
+why people arent vaccinating - Cockcroft, A., Usman, M. U., Nyamucherera, O. F., Emori, H., Duke, B., Umar, N. A., & Andersson, N. (2014). Why children are not vaccinated against measles: a cross-sectional study in two Nigerian States. Archives of Public Health = Archives Belges de Sante Publique, 72(1), 48. 
+
+effectiveness stat - Barrabeig, I., Rovira, A., Rius, C., Muñoz, P., Soldevila, N., Batalla, J., & Domínguez, A. (2011). Effectiveness of measles vaccination for control of exposed children. The Pediatric Infectious Disease Journal, 30(1), 78–80.
+
+growing number of refusal - Phadke, V. K., Bednarczyk, R. A., Salmon, D. A., & Omer, S. B. (2016). Association Between Vaccine Refusal and Vaccine-Preventable Diseases in the United States: A Review of Measles and Pertussis. JAMA: The Journal of the American Medical Association, 315(11), 1149–1158.
+
+28 times - Sinclair, D. R., Grefenstette, J. J., Krauland, M. G., Galloway, D. D., Frankeny, R. J., Travis, C., Burke, D. S., & Roberts, M. S. (2019). Forecasted Size of Measles Outbreaks Associated With Vaccination Exemptions for Schoolchildren. JAMA Network Open, 2(8), e199768.
