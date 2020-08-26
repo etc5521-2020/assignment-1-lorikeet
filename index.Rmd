@@ -12,6 +12,19 @@ output:
 
 [This assignment is for ETC5521 Assignment 1 by Team `r rmarkdown::metadata$team` comprising of `r knitr::combine_words(rmarkdown::metadata$author)`.]{style="color:#006DAE;"}
 
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      message = FALSE, 
+                      warning = FALSE)
+```
+
+```{r libraries}
+library(tidyverse)
+library(scales)
+library(ggrepel)
+library(knitr)
+library(kableExtra)
+```
 
 # Introduction and motivation
 
@@ -46,6 +59,122 @@ The individual state dataset was scraped from WSJ github repository and combined
 [FILL] Should include at least one plot or numerical summary for each of your questions, that helps the reader arrive at an answer. You should also write paragraphs describing the methods, summaries and findings. 
 
 # Emily section
+
+```{r load-data}
+measles <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-25/measles.csv') 
+```
+
+## Is the vaccination rate higher in private schools?
+
+Note: a lot of NAs, the first is not informative because it disregards that there might be more public schools than private therefore i have done the second and used average
+
+Rough method: Removed NAs, grouped by type, then summed all the mmr rates for each type. Divided this number by the total rate to get percentages and represented in a ggplot.
+
+```{r school-type-trial}
+school_type <- 
+  measles %>%
+  # remove NAs
+  filter(type != "NA") %>%
+  # group by type of school
+  group_by(type) %>%
+  # count the rate of measles vaccinations in each school
+  summarise(percent_added = n()) %>%
+  # find the total number of measles
+  mutate(total = sum(percent_added))
+```
+
+
+```{r ggplot-school-type-trial}
+ggplot(school_type,
+       aes(x = "",
+           y = percent_added,
+           fill = type)) +
+  geom_bar(stat = "identity", width = 1) +
+  # convert to a pie chart
+  coord_polar("y", start = 0) +
+  # get rid of axis labels
+  theme_void() +
+  # add a percentage label to each segment which is colour co-ordinated
+  geom_label_repel(label = percent(school_type$percent_added/29491),
+                   size= 3,
+                   show.legend = F,
+                   position = "dodge") +
+  ggtitle("Proportion of schools with vaccinations???")
+```
+
+```{r school-type-average}
+school_type_average <- 
+  measles %>%
+  # remove missing data
+  filter(type != "NA",
+         mmr != -1,
+         overall != -1) %>%
+  # group by type of school
+  group_by(type) %>%
+  # calculate the average mmr rate and overall rate according to type of school
+  summarise(average_mmr_rate = mean(mmr),
+            average_vacc_rate = mean(overall)) 
+```
+
+```{r ggplot-school-type}
+ggplot(school_type_average,
+       aes(x = "",
+           y = average_mmr_rate,
+           group = type)) +
+  geom_bar(stat = "identity", width = 1) +
+  facet_wrap(~type) +
+  # convert to a pie chart
+  coord_polar("y", start = 0) +
+  # get rid of axis labels
+  theme_void() +
+  # add a percentage label to each segment which is colour co-ordinated
+  geom_label_repel(label = percent(school_type_average$average_mmr_rate/100),
+                  size= 3,
+                   show.legend = F) +
+  ggtitle("The Average MMR Vaccination Rate according to School Type")
+```
+
+## How does the MMR vaccination rate compare to the school's overall vaccination rate?
+
+```{r summary-overall-mmr}
+school_type_average %>%
+  kable(col.names = c("Type",
+                      "Average MMR Vaccination Rate",
+                      "Average Overall Vaccination Rate"),
+        caption = "Comparison of both Average Vaccination Rates according to School Type") %>%
+  kable_styling(full_width = TRUE)
+```
+
+
+```{r compare-vacc-rates}
+vacc_rates <- school_type_average %>%
+   rename(MMR = average_mmr_rate,
+         Overall = average_vacc_rate) %>%
+  pivot_longer(cols = c("Overall", "MMR"),
+               names_to = "vaccine_type",
+               values_to = "rate") 
+```
+
+```{r vacc-rates-ggplot}
+ggplot(vacc_rates,
+         aes(x = vaccine_type,
+             y = rate,
+             group = type)) +
+  geom_col() +
+  facet_wrap(~type) +
+  xlab("Type of Vaccination") + 
+  ylab("") +
+  theme(axis.ticks = element_blank(),
+        panel.background = element_blank(),
+        axis.text.y = element_blank()) +
+  geom_label_repel(label = percent(vacc_rates$rate/100),
+                  size= 3,
+                   show.legend = F) +
+  ggtitle("Comparison of both Average Vaccination Rates according to School Type")
+```
+
+
+
 
 # Aryan section
 
