@@ -51,6 +51,8 @@ library(sf)
 library(maps)
 library(tools)
 library(ggpubr)
+library(kableExtra)
+library(scales)
 ```
 
 ```{r}
@@ -157,7 +159,35 @@ state_income <- readr::read_csv('https://raw.githubusercontent.com/TaxFoundation
 
 ```{r}
 measles_density_mmr_income <- measles_density_mmr %>% merge(state_income[c("stateName", "incomePerCapita")], by.x = "state", by.y = "stateName")
+```
 
+```{r best-mmr}
+measles_density_mmr_income %>%
+  select(state, mmr, incomePerCapita) %>%
+  rename(State = state, 
+         MMR = mmr, 
+         PCI = incomePerCapita) %>%
+  arrange(desc(MMR)) %>%
+  mutate(PCI = dollar(PCI)) %>%
+  head(5) %>%
+  kable() %>%
+  kable_styling()
+```
+
+```{r worst-mmr}
+measles_density_mmr_income %>%
+  select(state, mmr, incomePerCapita) %>%
+  rename(State = state, 
+         MMR = mmr, 
+         PCI = incomePerCapita) %>%
+  arrange(MMR) %>%
+  mutate(PCI = dollar(PCI)) %>%
+  head(5) %>%
+  kable() %>%
+  kable_styling()
+```
+
+```{r}
 p_mmr_income <- ggplot(measles_density_mmr_income, aes(y = fct_reorder(state,mmr))) +
   geom_col(aes(x = incomePerCapita, fill = "incomePerCapita")) +
   xlab("") +
@@ -171,7 +201,35 @@ ggarrange(p_mmr, p_mmr_income, nrow = 1, legend = "bottom")
 
 ```{r}
 measles_density_overall_income <- measles_density_overall %>% merge(state_income[c("stateName", "incomePerCapita")], by.x = "state", by.y = "stateName")
+```
 
+```{r best-overall}
+measles_density_overall_income %>%
+  select(state, overall, incomePerCapita) %>%
+  rename(State = state, 
+         Overall = overall, 
+         PCI = incomePerCapita) %>%
+  arrange(desc(Overall)) %>%
+  mutate(PCI = dollar(PCI)) %>%
+  head(5) %>%
+  kable() %>%
+  kable_styling()
+```
+
+```{r worst-overall}
+measles_density_overall_income %>%
+  select(state, overall, incomePerCapita) %>%
+  rename(State = state, 
+         Overall = overall, 
+         PCI = incomePerCapita) %>%
+  arrange(Overall) %>%
+  mutate(PCI = dollar(PCI)) %>%
+  head(5) %>%
+  kable() %>%
+  kable_styling()
+```
+
+```{r}
 p_overall_income <- ggplot(measles_density_overall_income, aes(y = fct_reorder(state,overall))) +
   geom_col(aes(x = incomePerCapita, fill = "incomePerCapita")) +
   xlab("") +
