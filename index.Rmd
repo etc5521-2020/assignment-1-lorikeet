@@ -24,6 +24,21 @@ library(scales)
 library(ggrepel)
 library(knitr)
 library(kableExtra)
+library(naniar)
+library(ggplot2)
+library(mapview)
+library(sf)
+library(maps)
+library(tools)
+library(ggpubr)
+library(plotly)
+```
+
+```{r load-data}
+measles <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-25/measles.csv')
+
+state_income <- readr::read_csv('https://raw.githubusercontent.com/TaxFoundation/facts-and-figures/master/42-income-per-capita-by-state.csv') %>%
+  filter(id != 0)
 ```
 
 # Introduction and motivation
@@ -34,7 +49,11 @@ A vaccine exists to prevent the onset of measles as there is no treatment. The v
 
 Unfortunately there is a growing number of individuals refusing vaccination, particularly in the US (Phadke et al., 2016). In Texas, the number of unvaccinated children attaining exemptions to attend school has increased by 28 times since 2003 (Sinclair et al., 2019). This has led to several outbreaks of vaccine preventable diseases, such as Measles. If this trend continues, there could be calamitous consequences. 
 
-This paper hopes to understand the reasons for vaccine refusal and determine whether there is a relationship between socio-economic status and vaccination rate. To analyse the relationship a dataset has been scraped from WSJ github repository. It should be noted that although every precaution has been taken to ensure accurate figures have been calculated, some of the MMR rates, overall vaccination rates, states??? and school types were missing from the original dataset. These numbers have been removed to reduce the impact on the figures calculated. 
+This paper hopes to understand the reasons for vaccine refusal and determine whether there is a relationship between socio-economic status and vaccination rate. To analyse the relationship a dataset has been scraped from WSJ github repository. Although every precaution has been taken to ensure accurate figures have been calculated, some of the MMR rates, overall vaccination rates and school types were missing from the original dataset. The missing data was identified using _naniar_, and removed to reduce the impact on the figures calculated. 
+
+```{r find-missing-data, include=FALSE}
+naniar::vis_miss(measles, warn_large_data = FALSE)
+```
 
 PERHAPS EXPLAIN DATA SOURCES IN MORE DETAIL
 
@@ -57,14 +76,6 @@ The individual state dataset was scraped from WSJ github repository and combined
 
 
 # Analysis and findings
-
-[FILL] Should include at least one plot or numerical summary for each of your questions, that helps the reader arrive at an answer. You should also write paragraphs describing the methods, summaries and findings. 
-
-## Emily section
-
-```{r load-data}
-measles <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-25/measles.csv') 
-```
 
 ## Is the MMR vaccination rate higher in private schools?
 
@@ -108,7 +119,6 @@ ggplot(school_type_average,
 
 The _school_type_average_ was tabulated to compare the overall vaccination rate and MMR vaccination rate. Then, both rates were plotted according to school type. 
 
-
 ```{r summary-overall-mmr}
 school_type_average %>%
   mutate(average_mmr_rate = percent(average_mmr_rate/100),
@@ -120,7 +130,6 @@ school_type_average %>%
   kable_styling(full_width = TRUE)
 ```
 
-
 ```{r compare-vacc-rates}
 vacc_rates <- school_type_average %>%
    rename(MMR = average_mmr_rate,
@@ -129,6 +138,9 @@ vacc_rates <- school_type_average %>%
                names_to = "vaccine_type",
                values_to = "rate") 
 ```
+
+When comparing the vaccination
+
 
 ```{r vacc-rates-ggplot}
 ggplot(vacc_rates,
@@ -148,32 +160,19 @@ ggplot(vacc_rates,
   ggtitle("Comparison of both Average Vaccination Rates according to School Type")
 ```
 
-
-
-
 # Aryan section
 
-```{r}
-library(tidyverse)
-library(ggplot2)
-library(mapview)
-library(sf)
-library(maps)
-library(tools)
-library(ggpubr)
-library(kableExtra)
-library(scales)
-```
-
-```{r}
-# Reading the data
-measles <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-25/measles.csv')
-```
+NOTE - I have filled with the colours to match, but i dont know if that looks any good so we can change!
 
 ## Question 1
+- grouped by states, found mean mmr and overall 
+- used map_data to plot the map, creates a tibble of the geogrpahical info of states (lat,long,)
+- then merged with measles_states, filtered out missing values <0, then plotted with geom polygon
+- then sketched a bar chart
 
-```{r}
-# Measles vaccination across all american states and school count
+
+```{r density-summary}
+# Measles vaccination across all American states and school count
 measles_density <- measles %>%
   group_by(state) %>%
   summarise(mmr = mean(mmr),
@@ -181,27 +180,35 @@ measles_density <- measles %>%
             count = n())
 
 # Measles vaccination across state
-measles_states <- measles_density[c("state", "mmr", "overall")] %>%
+measles_states <- measles_density[c("state", 
+                                    "mmr", 
+                                    "overall")] %>%
   rename(region = state) %>%
   mutate(region = tolower(region))
-
 ```
 
-```{r}
+```{r map-data}
 # Use map_data() to create usa mapping dataframe
 usa <- map_data("state")
 
 # Merging usa map data with measles across state data
-usa_measles_states <- merge(usa, measles_states, all.x = TRUE)
+usa_measles_states <- merge(usa, 
+                            measles_states, 
+                            all.x = TRUE)
 
 # finding centroids and abb of each state
-states <- st_as_sf(map("state", plot = FALSE, fill = TRUE))
-states <- cbind(states, st_coordinates(st_centroid(states)))
+states <- st_as_sf(map("state", 
+                       plot = FALSE, 
+                       fill = TRUE))
+states <- cbind(states, 
+                st_coordinates(st_centroid(states)))
 states$abb <- state.abb[match(states$ID,tolower(state.name))]
 
-
 # Merging measles state data and usa map data with centroid data
-usa_measles_states <- merge(usa_measles_states, states[c("ID", "X", "Y", "abb")], by.x = "region", by.y = "ID") %>%
+usa_measles_states <- merge(usa_measles_states, 
+                            states[c("ID", "X", "Y", "abb")], 
+                            by.x = "region", 
+                            by.y = "ID") %>%
   ungroup() %>%
   arrange(order)
 
@@ -212,146 +219,228 @@ usa_measles_states_mmr <- usa_measles_states %>%
   filter(mmr > 0)
 ```
 
-```{r mmr1}
+```{r mmr-map}
 # MMR vaccination rate across the states
-mmr_p <- ggplot(usa_measles_states_mmr, aes(long, lat, group=group, fill=mmr)) +
-  geom_polygon(color="grey")+
-  geom_text(aes(X, Y, label = abb), size = 4,color="white",family="Times") +
-  ggtitle("MMR vaccination rate across states") +
-  xlab("") +
-  ylab("")
+mmr_p <- ggplotly(ggplot(usa_measles_states_mmr, aes(long, 
+                                            lat, 
+                                            group=group, 
+                                            fill=mmr)) +
+  geom_polygon(color = "light grey") +
+  geom_text(aes(X, Y, 
+                label = abb), 
+            size = 4,
+            color = "white",
+            family = "sans") +
+  ggtitle("MMR Vaccination Rate across States") +
+  xlab("Latitude") +
+  ylab("Longitude") + 
+  theme(legend.position = "none"))
 mmr_p
 ```
 
-```{r overall1}
+```{r overall-map}
 # Overall vaccination rate across states
-overall_p <- ggplot(usa_measles_states_overall, aes(long, lat, group=group, fill=overall)) +
-  geom_polygon(color="grey")+
-  geom_text(aes(X, Y, label = abb), size = 4,color="white",family="Times") +
-  ggtitle("Overall vaccination rate across states") +
-  xlab("") +
-  ylab("")
+overall_p <- ggplotly(ggplot(usa_measles_states_overall, 
+                    aes(long, 
+                        lat, 
+                        group=group, 
+                        fill=overall)) +
+  geom_polygon(color="light grey")+
+  geom_text(aes(X, Y, label = abb), 
+            size = 4,
+            color="white",
+            family="sans") +
+  ggtitle("Overall Vaccination Rate Across States") +
+  xlab("Latitude") +
+  ylab("Longitude") +
+  theme(legend.position = "none"))
 overall_p
 ```
 
-```{r}
+```{r overall-state-plot}
 measles_density_overall <- measles_density %>%
   filter(overall > 0)
 
-p_overall <- ggplot(measles_density_overall, aes(y = fct_reorder(state,overall), x = overall, color = "Overall")) +
-  geom_col(fill = "red") +
-  xlab("") +
+p_overall <- ggplot(measles_density_overall, 
+                    aes(y = fct_reorder(state,
+                                        overall), 
+                        x = overall,
+                        fill = overall)) +
+  geom_col() +
+  xlab("Overall Vaccination Rate") +
   ylab("") +
-  theme(legend.title = element_blank())
+  theme(axis.ticks = element_blank(),
+        panel.background = element_blank(),
+        legend.position = "none") +
+  geom_label_repel(label = percent(measles_density_overall$overall/100),
+                  size= 2,
+                  color = "white",
+                  show.legend = F) 
 ```
 
-```{r}
+```{r mmr-state-plot}
 measles_density_mmr <- measles_density %>%
   filter(mmr > 0)
 
-p_mmr <- ggplot(measles_density_mmr, aes(y = fct_reorder(state,mmr), x = mmr, color = "MMR")) +
-  geom_col(fill = "blue") +
-  xlab("") +
+p_mmr <- ggplot(measles_density_mmr, 
+                aes(y = fct_reorder(state, 
+                                    mmr),
+                    x = mmr,
+                    fill = mmr)) +
+  geom_col() +
+  xlab("MMR Vaccination Rate") +
   ylab("") +
-  theme(legend.title = element_blank())
+  theme(axis.ticks = element_blank(),
+        panel.background = element_blank(),
+        legend.position = "none") +
+  geom_label_repel(label = percent(measles_density_mmr$mmr/100),
+                  size= 2,
+                  color = "white",
+                  show.legend = F) 
 ```
 
 ```{r}
-ggpubr::ggarrange(p_overall, p_mmr, nrow=1, legend="bottom")
+ggpubr::ggarrange(p_overall, 
+                  p_mmr, 
+                  nrow=1)
 ```
 
 ## Question 2
 
-```{r}
-state_income <- readr::read_csv('https://raw.githubusercontent.com/TaxFoundation/facts-and-figures/master/42-income-per-capita-by-state.csv') %>%
-  filter(id != 0)
-```
+- external dataset from taxfoundation (add link), merged that data with the measles density data
+- tabulated and then plotted in geomcol (income per capita against the vaccination rate for overall then mmr), then gg arrange to plot side by side
+- 
 
-```{r}
-measles_density_mmr_income <- measles_density_mmr %>% merge(state_income[c("stateName", "incomePerCapita")], by.x = "state", by.y = "stateName")
+```{r measles-density-income}
+measles_density_mmr_income <- measles_density_mmr %>% 
+  merge(state_income[c("stateName", 
+                       "incomePerCapita")], 
+        by.x = "state", 
+        by.y = "stateName")
 ```
 
 ```{r best-mmr}
 measles_density_mmr_income %>%
-  select(state, mmr, incomePerCapita) %>%
+  select(state, 
+         mmr, 
+         incomePerCapita) %>%
+  mutate(mmr = percent(measles_density_mmr_income$mmr/100)) %>%
   rename(State = state, 
          MMR = mmr, 
          PCI = incomePerCapita) %>%
   arrange(desc(MMR)) %>%
   mutate(PCI = dollar(PCI)) %>%
   head(5) %>%
-  kable() %>%
+  kable(caption = "The PCI of the States with the Highest MMR Vaccination Rate") %>%
   kable_styling()
 ```
 
 ```{r worst-mmr}
 measles_density_mmr_income %>%
-  select(state, mmr, incomePerCapita) %>%
+  select(state, 
+         mmr, 
+         incomePerCapita) %>%
+    mutate(mmr = percent(measles_density_mmr_income$mmr/100)) %>%
   rename(State = state, 
          MMR = mmr, 
          PCI = incomePerCapita) %>%
   arrange(MMR) %>%
   mutate(PCI = dollar(PCI)) %>%
   head(5) %>%
-  kable() %>%
+  kable(caption = "The PCI of the States with the Lowest MMR Vaccination Rate") %>%
   kable_styling()
 ```
 
-```{r}
-p_mmr_income <- ggplot(measles_density_mmr_income, aes(y = fct_reorder(state,mmr))) +
-  geom_col(aes(x = incomePerCapita, fill = "incomePerCapita")) +
-  xlab("") +
+
+
+
+```{r mmr-income-plot}
+p_mmr_income <- ggplot(measles_density_mmr_income, 
+                       aes(y = fct_reorder(state,
+                                           mmr))) +
+  geom_col(aes(x = incomePerCapita)) +
+  xlab("Income Per Capita") +
   ylab("") +
-  theme(legend.title = element_blank())
+  theme(axis.ticks = element_blank(),
+        panel.background = element_blank(),
+        legend.position = "none") +
+  geom_label_repel(aes(x = incomePerCapita),
+                  label = dollar(measles_density_mmr_income$incomePerCapita),
+                  size= 2,
+                  show.legend = F) 
 ```
 
-```{r}
-ggarrange(p_mmr, p_mmr_income, nrow = 1, legend = "bottom")
+```{r arrange-mmr-income}
+ggarrange(p_mmr, 
+          p_mmr_income, 
+          nrow = 1)
 ```
 
-```{r}
-measles_density_overall_income <- measles_density_overall %>% merge(state_income[c("stateName", "incomePerCapita")], by.x = "state", by.y = "stateName")
+```{r merge-measles-overall-income}
+measles_density_overall_income <- measles_density_overall %>%
+  merge(state_income[c("stateName", 
+                       "incomePerCapita")], 
+        by.x = "state", 
+        by.y = "stateName")
 ```
 
 ```{r best-overall}
 measles_density_overall_income %>%
-  select(state, overall, incomePerCapita) %>%
+  select(state, 
+         overall, 
+         incomePerCapita) %>%
+  mutate(overall = percent(measles_density_overall_income$overall/100)) %>%
   rename(State = state, 
          Overall = overall, 
          PCI = incomePerCapita) %>%
   arrange(desc(Overall)) %>%
   mutate(PCI = dollar(PCI)) %>%
   head(5) %>%
-  kable() %>%
+  kable(caption = "The PCI of the States with the Highest Overall Vaccination Rate") %>%
   kable_styling()
 ```
 
 ```{r worst-overall}
 measles_density_overall_income %>%
-  select(state, overall, incomePerCapita) %>%
+  select(state, 
+         overall, 
+         incomePerCapita) %>%
+  mutate(overall = percent(measles_density_overall_income$overall/100)) %>%
   rename(State = state, 
          Overall = overall, 
          PCI = incomePerCapita) %>%
   arrange(Overall) %>%
   mutate(PCI = dollar(PCI)) %>%
   head(5) %>%
-  kable() %>%
+  kable(caption = "The PCI of the States with the Lowest Overall Vaccination Rate") %>%
   kable_styling()
 ```
 
-```{r}
-p_overall_income <- ggplot(measles_density_overall_income, aes(y = fct_reorder(state,overall))) +
-  geom_col(aes(x = incomePerCapita, fill = "incomePerCapita")) +
-  xlab("") +
+```{r overall-income-plot}
+p_overall_income <- ggplot(measles_density_overall_income, 
+                           aes(y = fct_reorder(state,
+                                               overall))) +
+  geom_col(aes(x = incomePerCapita)) +
+  xlab("Income Per Capita") +
   ylab("") +
-  theme(legend.title = element_blank())
+  theme(axis.ticks = element_blank(),
+        panel.background = element_blank(),
+        legend.position = "none") +
+  geom_label_repel(aes(x = incomePerCapita),
+                  label = dollar(measles_density_overall_income$incomePerCapita),
+                  size= 2,
+                  show.legend = F) 
 ```
 
-```{r}
-ggarrange(p_overall, p_overall_income, nrow = 1, legend = "bottom")
+```{r arrange-overall-income}
+ggarrange(p_overall, 
+          p_overall_income, 
+          nrow = 1)
 ```
 
 # References
+
+https://github.com/TaxFoundation/facts-and-figures
 
 ## Emily's references (I will fix up in APA)
 measles definition - https://www.health.gov.au/health-topics/measles#what-is-measles
