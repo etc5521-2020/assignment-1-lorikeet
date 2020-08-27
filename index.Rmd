@@ -51,26 +51,24 @@ A vaccine exists to prevent the onset of measles as there is no treatment. The v
 
 Unfortunately there is a growing number of individuals refusing vaccination, particularly in the US (Phadke et al., 2016). In Texas, the number of unvaccinated children attaining exemptions to attend school has increased by 28 times since 2003 (Sinclair et al., 2019). This has led to several outbreaks of vaccine preventable diseases, such as Measles. If this trend continues, there could be calamitous consequences. 
 
-This paper hopes to determine whether there is a relationship between socio-economic status and vaccination rate. To analyse the relationship a dataset has been scraped from WSJ github repository. Although every precaution has been taken to ensure accurate figures have been calculated, some of the MMR rates, overall vaccination rates and school types were missing from the original dataset. The missing data was identified using _naniar_, and removed to reduce the impact on the figures calculated. 
+This paper hopes to determine whether there is a relationship between socioeconomic status and vaccination rate. Specifically, it explores whether MMR vaccination rates are higher in private schools, how the MMR vaccination rate compares to the overall vaccination rate and compares the average per capita income across the states with the highest and lowest vaccination rates. 
+
+To analyse the relationship a dataset was retrieved from Wall Street Journal. Although every precaution has been taken to ensure accurate figures have been calculated, some of the MMR rates, overall vaccination rates and school types were missing from the original dataset. The missing data was identified using _vis_miss_ in the _naniar_ package, and removed to reduce the impact on the figures calculated. 
 
 ```{r find-missing-data, include=FALSE}
 # Analyse how many variables are missing
 naniar::vis_miss(measles, warn_large_data = FALSE)
 ```
 
-PERHAPS EXPLAIN DATA SOURCES IN MORE DETAIL
-
 # Data description
-
-DO WE NEED TO ADD OTHER DATA SET? 
 
 The data comprises of vaccination rates for 46,412 schools in 32 U.S states and was retrieved from The Wall Street Journal. The variables include; the school academic year, the school's state, city, county, district, name, type, enrollment, MMR (measles, mumps and rubella) vaccination rate, overall vaccination rate, latitude, longitude and the percentage of students exempted from vaccinations due to personal, religious or medical reasons. 
 
 The data was collected in the 2017-18 school year for 11 states and 2018-19 school year for the remaining 21 states. The state health departments provided the vaccination data and the National Center for Education Statistic's provided the school location, which was matched against the school name. In the case that there was no match, the school's location was found with Google Maps API. 
 
-The individual state dataset was scraped from WSJ github repository and combined with the existing measles dataset with *left_join* to extract the longitude and latitude variables from it. Various functions from the *rvest* package were used to scrape the data including *read_html* and *html_table*. 
+The individual state dataset was scraped from the Tidy Tuesday Github repository and combined with the existing measles dataset with *left_join* to extract the longitude and latitude variables from it. Various functions from the *rvest* package were used to scrape the data including *read_html* and *html_table*. 
 
-**Primary Question**: Does Measles vaccination rate improve with better socio-economic conditions?
+**Primary Question**: Does Measles vaccination rate improve with better socioeconomic conditions?
 
 **Secondary Questions**:
 
@@ -154,7 +152,8 @@ When comparing the vaccination rates according to school type, it is clear that 
 ggplot(vacc_rates,
          aes(x = vaccine_type,
              y = rate,
-             group = type)) +
+             group = type,
+             fill = rate)) +
   geom_col() +
   # facet wrap by school type
   facet_wrap(~type) +
@@ -164,11 +163,13 @@ ggplot(vacc_rates,
   # get rid of background 
   theme(axis.ticks = element_blank(),
         panel.background = element_blank(),
-        axis.text.y = element_blank()) +
+        axis.text.y = element_blank(),
+        legend.position = "none") +
   # add percentage labels
   geom_label_repel(label = percent(vacc_rates$rate/100),
                   size= 3,
-                   show.legend = F) +
+                  color = "white",
+                  show.legend = F) +
   # add a title to the plot
   ggtitle("Comparison of both Average Vaccination Rates according to School Type")
 ```
@@ -176,9 +177,7 @@ ggplot(vacc_rates,
 
 ## Which states have the highest and lowest vaccination rates?
 
-CHECK METHODS
-
-The measles data was grouped by state and the average MMR and overall vaccination rate was calculated. Then, the _map_data_ function was used to plot the map by creating a tibble containing the geographical information of each state???. This data was merged with the _measles_states_ data, which contains the average MMR and overall vaccination rate for each state. Any missing data or negative values were removed and the remaining data was plotted onto a map and bar chart using _geom_polygon_ and _geom_col_, respectively. 
+The measles data was grouped by state and then the average MMR and overall vaccination rate were calculated. Then, the _map_data_ function was used to create a tibble containing the geographical information of each state. This data was merged with the _measles_states_ data, which contains the average MMR and overall vaccination rate for each state. Any missing data or negative values were removed and the remaining data was plotted onto a map and bar chart using _geom_polygon_ and _geom_col_, respectively. The _ggplotly_ function was used to make the maps interactive. 
 
 
 ```{r density-summary}
@@ -325,18 +324,18 @@ p_mmr <- ggplot(measles_density_mmr,
 
 The state with the highest MMR vaccination rate is Illinois at 97.39% and the state with the lowest MMR vaccination rate is Massachusetts at 57.68% as shown in the figure below. 
 
-```{r arrange-mmr-overall, fig.cap="The Overall and MMR Vaccination Rate, according to State"}
+```{r arrange-mmr-overall, fig.cap="**The Overall and MMR Vaccination Rate, according to State**"}
 # arrange both plots so they appear side-by-side
 ggpubr::ggarrange(p_overall, 
                   p_mmr, 
                   nrow=1)
 ```
 
-The state with the highest overall vaccination rate is North Caroline at 96.779%, while the state with the lowest vaccination rate is Washington at 75.238% as shown in the figure above. 
+The state with the highest overall vaccination rate is North Caroline at 96.779%, while the state with the lowest vaccination rate is Washington at 75.238% as shown in the figure above. It is difficult to compare the individual states MMR vaccination rate with the overall vaccination rate due to the missing data. However, California, Vermont, Ohio and Oregon have similar MMR and overall vaccination rates. 
 
 ## What is the average income in the states with the highest and lowest vaccination rate?
 
-To analyse the average income of the states with the highest and lowest vaccination rate, an external dataset from Tax Foundation was retrieved (add link!!). This data was merged with the _measles_density_ tibble, and the top and bottom five vaccination rates were tabulated for both vaccination rates. The vaccination rate and income data were plotted using _geom_col_ and _gg_arrange_, and ordered in descending order. 
+To analyse the average income of the states with the highest and lowest vaccination rate, an external dataset from Tax Foundation was retrieved (add link!!). This data was merged with the measles data grouped by state, and the top and bottom five observations were tabulated for both the vaccination rates. The vaccination rate and income data were plotted using _geom_col_ and _gg_arrange_, and ordered in descending order. 
 
 ```{r measles-density-income}
 measles_density_mmr_income <- measles_density_mmr %>% 
@@ -403,7 +402,7 @@ p_mmr_income <- ggplot(measles_density_mmr_income,
                   show.legend = F) 
 ```
 
-```{r arrange-mmr-income, fig.cap= "The MMR Vaccination Rate and PCI of each State"}
+```{r arrange-mmr-income, fig.cap= "**The MMR Vaccination Rate and PCI of each State**"}
 ggarrange(p_mmr, 
           p_mmr_income, 
           nrow = 1) 
@@ -475,15 +474,20 @@ p_overall_income <- ggplot(measles_density_overall_income,
 
 The states with the highest overall vaccination rate were North Carolina, Tennessee, Florida, Michigan and Oregon. They had an average per capita income that ranged from $46,117 to $50,843, which is quite low when compared to the other incomes in the plot. The states with the lowest overall vaccination rate were Washington, Oklahoma, Idaho, Iowa and Ohio. Idaho had the lowest per capita income, however, Washington had one of the highest per capita income's at $62,026, as seen in the figure below. 
 
-```{r arrange-overall-income, fig.cap="The Overall Vaccination Rate and PCI of each State"}
+```{r arrange-overall-income, fig.cap="**The Overall Vaccination Rate and PCI of each State**"}
 ggarrange(p_overall, 
           p_overall_income, 
           nrow = 1)
 ```
-The analysis has revealed that it is likely that there is no association with socioeconomic status and vaccination rate. Private schools, which are more expensive than public schools thus inferring greater economic status, have a lower average MMR and average overall vaccination rate than their public counterparts. The two states with the lowest MMR vaccination rate; Connecticut and Massachusetts, had the two highest average per capita incomes. Similarly, Washington had the lowest overall vaccination rate and one of the highest average per capita incomes. Therefore, it is unlikely that vaccination rate improves with socioeconomic status. 
+
+# Conclusion
+
+The analysis has revealed that it is likely that there is no association with socioeconomic status and vaccination rates. Private schools, which are more expensive than public schools thus inferring greater socioeconomic status, have a lower average MMR and average overall vaccination rate than their public counterparts. The two states with the lowest MMR vaccination rate; Connecticut and Massachusetts, had the two highest average per capita incomes. Similarly, Washington had the lowest overall vaccination rate and one of the highest average per capita incomes. Therefore, it is unlikely that vaccination rate improves with socioeconomic status. 
 
 # References
 Add data and software and order in alphabetical
+- 2 datasets - tax foundation, measles 
+-tidy 
 https://github.com/TaxFoundation/facts-and-figures
 
 
@@ -536,7 +540,8 @@ Pebesma, E., 2018. Simple Features for R: Standardized
   439-446, https://doi.org/10.32614/RJ-2018-009  
   
 Phadke, V. K., Bednarczyk, R. A., Salmon, D. A., & Omer, S. B. (2016). Association Between
-  Vaccine Refusal and Vaccine-Preventable Diseases in the United States: A Review of Measles    and Pertussis. JAMA: The Journal of the American Medical Association, 315(11), 1149–1158.    
+  Vaccine Refusal and Vaccine-Preventable Diseases in the United States: A Review of Measles    and Pertussis. JAMA: The Journal of the American Medical Association, 315(11), 1149–1158. 
+  
 Queensland Health. (2019, October 22). What is measles and why do we vaccinate against it?
   Retrieved 25 August 2020, from
   https://www.health.qld.gov.au/news-events/news/what-is-measles-why-vaccinate#:~:text=The%20
