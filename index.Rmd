@@ -43,5 +43,202 @@ The individual state dataset was scraped from WSJ github repository and combined
 
 ## Aryan section
 
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(mapview)
+library(sf)
+library(maps)
+library(tools)
+library(ggpubr)
+library(kableExtra)
+library(scales)
+```
+
+```{r}
+# Reading the data
+measles <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-25/measles.csv')
+```
+
+## Question 1
+
+```{r}
+# Measles vaccination across all american states and school count
+measles_density <- measles %>%
+  group_by(state) %>%
+  summarise(mmr = mean(mmr),
+            overall = mean(overall),
+            count = n())
+
+# Measles vaccination across state
+measles_states <- measles_density[c("state", "mmr", "overall")] %>%
+  rename(region = state) %>%
+  mutate(region = tolower(region))
+
+```
+
+```{r}
+# Use map_data() to create usa mapping dataframe
+usa <- map_data("state")
+
+# Merging usa map data with measles across state data
+usa_measles_states <- merge(usa, measles_states, all.x = TRUE)
+
+# finding centroids and abb of each state
+states <- st_as_sf(map("state", plot = FALSE, fill = TRUE))
+states <- cbind(states, st_coordinates(st_centroid(states)))
+states$abb <- state.abb[match(states$ID,tolower(state.name))]
+
+
+# Merging measles state data and usa map data with centroid data
+usa_measles_states <- merge(usa_measles_states, states[c("ID", "X", "Y", "abb")], by.x = "region", by.y = "ID") %>%
+  ungroup() %>%
+  arrange(order)
+
+usa_measles_states_overall <- usa_measles_states %>%
+  filter(overall > 0)
+
+usa_measles_states_mmr <- usa_measles_states %>%
+  filter(mmr > 0)
+```
+
+```{r mmr1}
+# MMR vaccination rate across the states
+mmr_p <- ggplot(usa_measles_states_mmr, aes(long, lat, group=group, fill=mmr)) +
+  geom_polygon(color="grey")+
+  geom_text(aes(X, Y, label = abb), size = 4,color="white",family="Times") +
+  ggtitle("MMR vaccination rate across states") +
+  xlab("") +
+  ylab("")
+mmr_p
+```
+
+```{r overall1}
+# Overall vaccination rate across states
+overall_p <- ggplot(usa_measles_states_overall, aes(long, lat, group=group, fill=overall)) +
+  geom_polygon(color="grey")+
+  geom_text(aes(X, Y, label = abb), size = 4,color="white",family="Times") +
+  ggtitle("Overall vaccination rate across states") +
+  xlab("") +
+  ylab("")
+overall_p
+```
+
+```{r}
+measles_density_overall <- measles_density %>%
+  filter(overall > 0)
+
+p_overall <- ggplot(measles_density_overall, aes(y = fct_reorder(state,overall), x = overall, color = "Overall")) +
+  geom_col(fill = "red") +
+  xlab("") +
+  ylab("") +
+  theme(legend.title = element_blank())
+```
+
+```{r}
+measles_density_mmr <- measles_density %>%
+  filter(mmr > 0)
+
+p_mmr <- ggplot(measles_density_mmr, aes(y = fct_reorder(state,mmr), x = mmr, color = "MMR")) +
+  geom_col(fill = "blue") +
+  xlab("") +
+  ylab("") +
+  theme(legend.title = element_blank())
+```
+
+```{r}
+ggpubr::ggarrange(p_overall, p_mmr, nrow=1, legend="bottom")
+```
+
+## Question 2
+
+```{r}
+state_income <- readr::read_csv('https://raw.githubusercontent.com/TaxFoundation/facts-and-figures/master/42-income-per-capita-by-state.csv') %>%
+  filter(id != 0)
+```
+
+```{r}
+measles_density_mmr_income <- measles_density_mmr %>% merge(state_income[c("stateName", "incomePerCapita")], by.x = "state", by.y = "stateName")
+```
+
+```{r best-mmr}
+measles_density_mmr_income %>%
+  select(state, mmr, incomePerCapita) %>%
+  rename(State = state, 
+         MMR = mmr, 
+         PCI = incomePerCapita) %>%
+  arrange(desc(MMR)) %>%
+  mutate(PCI = dollar(PCI)) %>%
+  head(5) %>%
+  kable() %>%
+  kable_styling()
+```
+
+```{r worst-mmr}
+measles_density_mmr_income %>%
+  select(state, mmr, incomePerCapita) %>%
+  rename(State = state, 
+         MMR = mmr, 
+         PCI = incomePerCapita) %>%
+  arrange(MMR) %>%
+  mutate(PCI = dollar(PCI)) %>%
+  head(5) %>%
+  kable() %>%
+  kable_styling()
+```
+
+```{r}
+p_mmr_income <- ggplot(measles_density_mmr_income, aes(y = fct_reorder(state,mmr))) +
+  geom_col(aes(x = incomePerCapita, fill = "incomePerCapita")) +
+  xlab("") +
+  ylab("") +
+  theme(legend.title = element_blank())
+```
+
+```{r}
+ggarrange(p_mmr, p_mmr_income, nrow = 1, legend = "bottom")
+```
+
+```{r}
+measles_density_overall_income <- measles_density_overall %>% merge(state_income[c("stateName", "incomePerCapita")], by.x = "state", by.y = "stateName")
+```
+
+```{r best-overall}
+measles_density_overall_income %>%
+  select(state, overall, incomePerCapita) %>%
+  rename(State = state, 
+         Overall = overall, 
+         PCI = incomePerCapita) %>%
+  arrange(desc(Overall)) %>%
+  mutate(PCI = dollar(PCI)) %>%
+  head(5) %>%
+  kable() %>%
+  kable_styling()
+```
+
+```{r worst-overall}
+measles_density_overall_income %>%
+  select(state, overall, incomePerCapita) %>%
+  rename(State = state, 
+         Overall = overall, 
+         PCI = incomePerCapita) %>%
+  arrange(Overall) %>%
+  mutate(PCI = dollar(PCI)) %>%
+  head(5) %>%
+  kable() %>%
+  kable_styling()
+```
+
+```{r}
+p_overall_income <- ggplot(measles_density_overall_income, aes(y = fct_reorder(state,overall))) +
+  geom_col(aes(x = incomePerCapita, fill = "incomePerCapita")) +
+  xlab("") +
+  ylab("") +
+  theme(legend.title = element_blank())
+```
+
+```{r}
+ggarrange(p_overall, p_overall_income, nrow = 1, legend = "bottom")
+```
 
 # References
