@@ -19,6 +19,7 @@ knitr::opts_chunk$set(echo = FALSE,
 ```
 
 ```{r libraries}
+# Load libraries
 library(tidyverse)
 library(scales)
 library(ggrepel)
@@ -35,6 +36,7 @@ library(plotly)
 ```
 
 ```{r load-data}
+# Read in data 
 measles <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-25/measles.csv')
 
 state_income <- readr::read_csv('https://raw.githubusercontent.com/TaxFoundation/facts-and-figures/master/42-income-per-capita-by-state.csv') %>%
@@ -52,6 +54,7 @@ Unfortunately there is a growing number of individuals refusing vaccination, par
 This paper hopes to determine whether there is a relationship between socio-economic status and vaccination rate. To analyse the relationship a dataset has been scraped from WSJ github repository. Although every precaution has been taken to ensure accurate figures have been calculated, some of the MMR rates, overall vaccination rates and school types were missing from the original dataset. The missing data was identified using _naniar_, and removed to reduce the impact on the figures calculated. 
 
 ```{r find-missing-data, include=FALSE}
+# Analyse how many variables are missing
 naniar::vis_miss(measles, warn_large_data = FALSE)
 ```
 
@@ -71,15 +74,14 @@ The individual state dataset was scraped from WSJ github repository and combined
 
 **Secondary Questions**:
 
-- 1. Which states have the highest and lowest vaccination rates?
-- 2. What is the average income in the states with the highest and lowest vaccination rate?
-- 3. Is the MMR vaccination rate higher in private schools?
-- 4. How does the MMR vaccination rate compare to the school's overall vaccination rate?
-
+- Are the MMR vaccination rates higher in private schools?
+- How does the MMR vaccination rate compare to the school's overall vaccination rate?
+- Which states have the highest and lowest vaccination rates?
+- What is the average income in the states with the highest and lowest vaccination rate?
 
 # Analysis and findings
 
-## Is the MMR vaccination rate higher in private schools?
+## Are the MMR vaccination rates higher in private schools?
 
 The measles data was filtered to remove missing school type, overall vaccination rate and MMR rate. It was grouped by type of school and the average MMR vaccination rate and overall vaccination rate was calculated using the _mean_ function. The tibble generated was named _school_type_average_. Then, the average MMR rates from the  _school_type_average_ tibble were plotted. The rates were annotated accordingly, to draw attention to the difference between the MMR vaccination rate for each school type. 
 
@@ -112,6 +114,7 @@ ggplot(school_type_average,
   geom_label_repel(label = percent(school_type_average$average_mmr_rate/100),
                   size= 3,
                    show.legend = F) +
+  # add a title
   ggtitle("The Average MMR Vaccination Rate according to School Type")
 ```
 
@@ -123,11 +126,14 @@ The _school_type_average_ data was tabulated to compare the overall vaccination 
 
 ```{r summary-overall-mmr}
 school_type_average %>%
+  # convert rates to a percentage
   mutate(average_mmr_rate = percent(average_mmr_rate/100),
          average_vacc_rate = percent(average_vacc_rate/100)) %>%
+  # change column names
   kable(col.names = c("Type",
                       "Average MMR Vaccination Rate",
                       "Average Overall Vaccination Rate"),
+        # add a caption
         caption = "Comparison of both Average Vaccination Rates according to School Type") %>%
   kable_styling(full_width = TRUE)
 ```
@@ -136,12 +142,13 @@ school_type_average %>%
 vacc_rates <- school_type_average %>%
    rename(MMR = average_mmr_rate,
          Overall = average_vacc_rate) %>%
+  # pivot the table longer so that it can be used easily when plotting
   pivot_longer(cols = c("Overall", "MMR"),
                names_to = "vaccine_type",
                values_to = "rate") 
 ```
 
-When comparing the vaccination rates according to school type, it is clear that the overall vaccination rate is lower than the MMR vaccination rate for all school types. Public schools have the highest overall vaccination rate and MMR rate. 
+When comparing the vaccination rates according to school type, it is clear that the overall vaccination rate is lower than the MMR vaccination rate for all school types as seen in the plot below. Public schools have the highest overall vaccination rate and MMR rate. 
 
 ```{r vacc-rates-ggplot}
 ggplot(vacc_rates,
@@ -149,15 +156,20 @@ ggplot(vacc_rates,
              y = rate,
              group = type)) +
   geom_col() +
+  # facet wrap by school type
   facet_wrap(~type) +
+  # add x and y axis 
   xlab("Type of Vaccination") + 
   ylab("Average Vaccination Rate") +
+  # get rid of background 
   theme(axis.ticks = element_blank(),
         panel.background = element_blank(),
         axis.text.y = element_blank()) +
+  # add percentage labels
   geom_label_repel(label = percent(vacc_rates$rate/100),
                   size= 3,
                    show.legend = F) +
+  # add a title to the plot
   ggtitle("Comparison of both Average Vaccination Rates according to School Type")
 ```
 
@@ -210,6 +222,7 @@ usa_measles_states <- merge(usa_measles_states,
   ungroup() %>%
   arrange(order)
 
+# filter the missing data out
 usa_measles_states_overall <- usa_measles_states %>%
   filter(overall > 0)
 
@@ -219,6 +232,7 @@ usa_measles_states_mmr <- usa_measles_states %>%
 
 ```{r mmr-map}
 # MMR vaccination rate across the states
+# add ggplotly to make the plot interactive
 mmr_p <- ggplotly(ggplot(usa_measles_states_mmr, aes(long, 
                                             lat, 
                                             group=group, 
@@ -229,6 +243,7 @@ mmr_p <- ggplotly(ggplot(usa_measles_states_mmr, aes(long,
             size = 4,
             color = "white",
             family = "sans") +
+    # add title and x and y axis and remove the legend
   ggtitle("MMR Vaccination Rate across States") +
   xlab("Latitude") +
   ylab("Longitude") + 
@@ -238,6 +253,7 @@ mmr_p
 
 ```{r overall-map}
 # Overall vaccination rate across states
+# add ggplotly to make the plot interactive
 overall_p <- ggplotly(ggplot(usa_measles_states_overall, 
                     aes(long, 
                         lat, 
@@ -248,9 +264,11 @@ overall_p <- ggplotly(ggplot(usa_measles_states_overall,
             size = 4,
             color="white",
             family="sans") +
+    # add a title and x and y axis
   ggtitle("Overall Vaccination Rate Across States") +
   xlab("Latitude") +
   ylab("Longitude") +
+    # remove the legend
   theme(legend.position = "none"))
 overall_p
 ```
@@ -263,13 +281,17 @@ p_overall <- ggplot(measles_density_overall,
                     aes(y = fct_reorder(state,
                                         overall), 
                         x = overall,
+                        # fill according to overall vaccination rate
                         fill = overall)) +
   geom_col() +
+  # add x and y axis labels
   xlab("Overall Vaccination Rate") +
   ylab("") +
+  #remove axis ticks, legend and panel background
   theme(axis.ticks = element_blank(),
         panel.background = element_blank(),
         legend.position = "none") +
+  # label the plot with percentages
   geom_label_repel(label = percent(measles_density_overall$overall/100),
                   size= 2,
                   color = "white",
@@ -284,28 +306,33 @@ p_mmr <- ggplot(measles_density_mmr,
                 aes(y = fct_reorder(state, 
                                     mmr),
                     x = mmr,
+                    # fill according to mmr vaccination rate
                     fill = mmr)) +
   geom_col() +
+  # add x and y axis labels
   xlab("MMR Vaccination Rate") +
   ylab("") +
+  #remove axis ticks, legend and panel background
   theme(axis.ticks = element_blank(),
         panel.background = element_blank(),
         legend.position = "none") +
+  # label the plot with percentages
   geom_label_repel(label = percent(measles_density_mmr$mmr/100),
                   size= 2,
                   color = "white",
                   show.legend = F) 
 ```
 
-The state with the highest MMR vaccination rate is Illinois at 97.39% and the state with the lowest MMR vaccination rate is Massachusetts at 57.68%. 
+The state with the highest MMR vaccination rate is Illinois at 97.39% and the state with the lowest MMR vaccination rate is Massachusetts at 57.68% as shown in the figure below. 
 
 ```{r arrange-mmr-overall, fig.cap="The Overall and MMR Vaccination Rate, according to State"}
+# arrange both plots so they appear side-by-side
 ggpubr::ggarrange(p_overall, 
                   p_mmr, 
                   nrow=1)
 ```
 
-The state with the highest overall vaccination rate is North Caroline at 96.779%, while the state with the lowest vaccination rate is Washington at 75.238%. 
+The state with the highest overall vaccination rate is North Caroline at 96.779%, while the state with the lowest vaccination rate is Washington at 75.238% as shown in the figure above. 
 
 ## What is the average income in the states with the highest and lowest vaccination rate?
 
@@ -313,6 +340,7 @@ To analyse the average income of the states with the highest and lowest vaccinat
 
 ```{r measles-density-income}
 measles_density_mmr_income <- measles_density_mmr %>% 
+  # merge the data
   merge(state_income[c("stateName", 
                        "incomePerCapita")], 
         by.x = "state", 
@@ -324,13 +352,16 @@ measles_density_mmr_income %>%
   select(state, 
          mmr, 
          incomePerCapita) %>%
+  # convert mmr to a percentage
   mutate(mmr = percent(measles_density_mmr_income$mmr/100)) %>%
+  # rename the column names
   rename(State = state, 
          MMR = mmr, 
          PCI = incomePerCapita) %>%
   arrange(desc(MMR)) %>%
   mutate(PCI = dollar(PCI)) %>%
   head(5) %>%
+  # add a caption
   kable(caption = "The PCI of the States with the Highest MMR Vaccination Rate") %>%
   kable_styling()
 ```
@@ -340,6 +371,7 @@ measles_density_mmr_income %>%
   select(state, 
          mmr, 
          incomePerCapita) %>%
+  # convert mmr to percentage
     mutate(mmr = percent(measles_density_mmr_income$mmr/100)) %>%
   rename(State = state, 
          MMR = mmr, 
@@ -347,11 +379,12 @@ measles_density_mmr_income %>%
   arrange(MMR) %>%
   mutate(PCI = dollar(PCI)) %>%
   head(5) %>%
+  # add a caption
   kable(caption = "The PCI of the States with the Lowest MMR Vaccination Rate") %>%
   kable_styling()
 ```
 
-The states with the highest MMR vaccination rate were; Illinois, Pennsylvania, Utah, Colorado and New York. These states have an average per capita income of $56,839,	$56,225, $46,320, $58,456 and $68,668, respectively.
+The states with the highest MMR vaccination rate were; Illinois, Pennsylvania, Utah, Colorado and New York. These states each have an average per capita income of $56,839,	$56,225, $46,320, $58,456 and $68,668, respectively, as shown in the plot below.
 
 ```{r mmr-income-plot}
 p_mmr_income <- ggplot(measles_density_mmr_income, 
@@ -363,6 +396,7 @@ p_mmr_income <- ggplot(measles_density_mmr_income,
   theme(axis.ticks = element_blank(),
         panel.background = element_blank(),
         legend.position = "none") +
+  # add labels to the figure 
   geom_label_repel(aes(x = incomePerCapita),
                   label = dollar(measles_density_mmr_income$incomePerCapita),
                   size= 2,
@@ -375,10 +409,11 @@ ggarrange(p_mmr,
           nrow = 1) 
 ```
 
-The states with the lowest MMR vaccination rate were Massachusetts, Connecticut, Arizona, Montana and Washington. Comparatively, these states have a much higher average per capita income with Massachusetts and Connecticut reporting two of the highest average per capita income. 
+The states with the lowest MMR vaccination rate were Massachusetts, Connecticut, Arizona, Montana and Washington. Interestingly enough, Massachusetts and Connecticut report two of the highest average per capita incomes as seen in the figure above. 
 
 ```{r merge-measles-overall-income}
 measles_density_overall_income <- measles_density_overall %>%
+  # merge the tables
   merge(state_income[c("stateName", 
                        "incomePerCapita")], 
         by.x = "state", 
@@ -390,6 +425,7 @@ measles_density_overall_income %>%
   select(state, 
          overall, 
          incomePerCapita) %>%
+  # convert overall vaccination rate to a percentage
   mutate(overall = percent(measles_density_overall_income$overall/100)) %>%
   rename(State = state, 
          Overall = overall, 
@@ -397,6 +433,7 @@ measles_density_overall_income %>%
   arrange(desc(Overall)) %>%
   mutate(PCI = dollar(PCI)) %>%
   head(5) %>%
+  # add a caption
   kable(caption = "The PCI of the States with the Highest Overall Vaccination Rate") %>%
   kable_styling()
 ```
@@ -406,6 +443,7 @@ measles_density_overall_income %>%
   select(state, 
          overall, 
          incomePerCapita) %>%
+  # convert to a percentage
   mutate(overall = percent(measles_density_overall_income$overall/100)) %>%
   rename(State = state, 
          Overall = overall, 
@@ -413,6 +451,7 @@ measles_density_overall_income %>%
   arrange(Overall) %>%
   mutate(PCI = dollar(PCI)) %>%
   head(5) %>%
+  # add a caption
   kable(caption = "The PCI of the States with the Lowest Overall Vaccination Rate") %>%
   kable_styling()
 ```
@@ -427,36 +466,120 @@ p_overall_income <- ggplot(measles_density_overall_income,
   theme(axis.ticks = element_blank(),
         panel.background = element_blank(),
         legend.position = "none") +
+  # annotate the figure with the pci
   geom_label_repel(aes(x = incomePerCapita),
                   label = dollar(measles_density_overall_income$incomePerCapita),
                   size= 2,
                   show.legend = F) 
 ```
 
-The states with the highest overall vaccination rate were North Carolina, Tennessee, Florida, Michigan and Oregon. They had an average per capita income that ranged from $46,117 to $50,843, which is quite low comparitively. The states with the lowest overall vaccination rate were Washington, Oklahoma, Idaho, Iowa and Ohio. Idaho had the lowest per capita income, however, Washington had one of the highest per capita income's at $62,026. 
+The states with the highest overall vaccination rate were North Carolina, Tennessee, Florida, Michigan and Oregon. They had an average per capita income that ranged from $46,117 to $50,843, which is quite low when compared to the other incomes in the plot. The states with the lowest overall vaccination rate were Washington, Oklahoma, Idaho, Iowa and Ohio. Idaho had the lowest per capita income, however, Washington had one of the highest per capita income's at $62,026, as seen in the figure below. 
 
 ```{r arrange-overall-income, fig.cap="The Overall Vaccination Rate and PCI of each State"}
 ggarrange(p_overall, 
           p_overall_income, 
           nrow = 1)
 ```
-The analysis has revealed that it is likely that there is no association with socioeconomic status and vaccination rate. Private schools, which are more expensive than public schools (thus inferring affluence???), have a lower average MMR and average overall vaccination rate than their public counterparts. Similarly, the two states with the lowest MMR vaccination; Connecticut and Massachusetts, had the two highest average per capita incomes. Similarly,  Washington had the lowest overall vaccination rate and one of the highest average per capita incomes. Therefore, it is unlikely that vaccination rate improves with socio-economic status. 
+The analysis has revealed that it is likely that there is no association with socioeconomic status and vaccination rate. Private schools, which are more expensive than public schools thus inferring greater economic status, have a lower average MMR and average overall vaccination rate than their public counterparts. The two states with the lowest MMR vaccination rate; Connecticut and Massachusetts, had the two highest average per capita incomes. Similarly, Washington had the lowest overall vaccination rate and one of the highest average per capita incomes. Therefore, it is unlikely that vaccination rate improves with socioeconomic status. 
 
 # References
 Add data and software and order in alphabetical
-
 https://github.com/TaxFoundation/facts-and-figures
 
-Commonwealth of Australia. (2020, May 27). Measles. Retrieved 25 August 2020, from https://www.health.gov.au/health-topics/measles#what-is-measles
 
-Queensland Health. (2019, October 22). What is measles and why do we vaccinate against it? Retrieved 25 August 2020, from https://www.health.qld.gov.au/news-events/news/what-is-measles-why-vaccinate#:~:text=The%20measles%20vaccine%20contains%20a,is%20better%20prepared%20to%20respond
+Alboukadel Kassambara (2020). ggpubr: 'ggplot2' Based
+  Publication Ready Plots. R package version 0.4.0.
+  https://CRAN.R-project.org/package=ggpubr
+  
+Barrabeig, I., Rovira, A., Rius, C., Muñoz, P., Soldevila, N., Batalla, J., & Domínguez, A.
+  (2011). Effectiveness of measles vaccination for control of exposed children. The Pediatric
+  Infectious Disease Journal, 30(1), 78–80.
 
-Cockcroft, A., Usman, M. U., Nyamucherera, O. F., Emori, H., Duke, B., Umar, N. A., & Andersson, N. (2014). Why children are not vaccinated against measles: a cross-sectional study in two Nigerian States. Archives of Public Health = Archives Belges de Sante Publique, 72(1), 48.
+C. Sievert. Interactive Web-Based Data Visualization with R,
+  plotly, and shiny. Chapman and Hall/CRC Florida, 2020.
 
-Barrabeig, I., Rovira, A., Rius, C., Muñoz, P., Soldevila, N., Batalla, J., & Domínguez, A. (2011). Effectiveness of measles vaccination for control of exposed children. The Pediatric Infectious Disease Journal, 30(1), 78–80.
+Cockcroft, A., Usman, M. U., Nyamucherera, O. F., Emori, H., Duke, B., Umar, N. A., &
+  Andersson, N. (2014). Why children are not vaccinated against measles: a cross-sectional
+  study in two Nigerian States. Archives of Public Health = Archives Belges de Sante Publique,
+  72(1), 48.
 
-Phadke, V. K., Bednarczyk, R. A., Salmon, D. A., & Omer, S. B. (2016). Association Between Vaccine Refusal and Vaccine-Preventable Diseases in the United States: A Review of Measles and Pertussis. JAMA: The Journal of the American Medical Association, 315(11), 1149–1158.
+Commonwealth of Australia. (2020, May 27). Measles. Retrieved 25 August 2020, from
+  https://www.health.gov.au/health-topics/measles#what-is-measles
 
-Sinclair, D. R., Grefenstette, J. J., Krauland, M. G., Galloway, D. D., Frankeny, R. J., Travis, C., … Roberts, M. S. (2019). Forecasted Size of Measles Outbreaks Associated With Vaccination Exemptions for Schoolchildren. JAMA Network Open, 2(8), e199768.
+Hadley Wickham and Dana Seidel (2020). scales: Scale
+  Functions for Visualization. R package version 1.1.1.
+  https://CRAN.R-project.org/package=scales
+  
+H. Wickham. ggplot2: Elegant Graphics for Data Analysis.
+  Springer-Verlag New York, 2016.
+  
+Hao Zhu (2019). kableExtra: Construct Complex Table with
+  'kable' and Pipe Syntax. R package version 1.1.0.
+  https://CRAN.R-project.org/package=kableExtra
+  
+Kamil Slowikowski (2020). ggrepel: Automatically Position
+  Non-Overlapping Text Labels with 'ggplot2'. R package version
+  0.8.2. https://CRAN.R-project.org/package=ggrepel
+  
+Nicholas Tierney, Di Cook, Miles McBain and Colin Fay (2020).
+  naniar: Data Structures, Summaries, and Visualisations for
+  Missing Data. R package version 0.5.2.
+  https://CRAN.R-project.org/package=naniar  
+  
+Original S code by Richard A. Becker, Allan R. Wilks. R
+  version by Ray Brownrigg. Enhancements by Thomas P Minka and
+  Alex Deckmyn. (2018). maps: Draw Geographical Maps. R package
+  version 3.3.0. https://CRAN.R-project.org/package=maps
 
-Shaw, J., Tserenpuntsag, B., McNutt, L.-A., & Halsey, N. (2014). United States private schools have higher rates of exemptions to school immunization requirements than public schools. The Journal of Pediatrics, 165(1), 129–133.
+Pebesma, E., 2018. Simple Features for R: Standardized
+  Support for Spatial Vector Data. The R Journal 10 (1),
+  439-446, https://doi.org/10.32614/RJ-2018-009  
+  
+Phadke, V. K., Bednarczyk, R. A., Salmon, D. A., & Omer, S. B. (2016). Association Between
+  Vaccine Refusal and Vaccine-Preventable Diseases in the United States: A Review of Measles    and Pertussis. JAMA: The Journal of the American Medical Association, 315(11), 1149–1158.    
+Queensland Health. (2019, October 22). What is measles and why do we vaccinate against it?
+  Retrieved 25 August 2020, from
+  https://www.health.qld.gov.au/news-events/news/what-is-measles-why-vaccinate#:~:text=The%20
+  easles%20vaccine%20contains%20a,is%20better%20prepared%20to%20respond
+  
+R Core Team (2020). R: A language and environment for
+  statistical computing. R Foundation for Statistical
+  Computing, Vienna, Austria. URL https://www.R-project.org/.
+  
+Sinclair, D. R., Grefenstette, J. J., Krauland, M. G., Galloway, D. D., Frankeny, R. J.,
+  Travis, C., … Roberts, M. S. (2019). Forecasted Size of Measles Outbreaks Associated With
+  Vaccination Exemptions for Schoolchildren. JAMA Network Open, 2(8), e199768.
+
+Shaw, J., Tserenpuntsag, B., McNutt, L.-A., & Halsey, N. (2014). United States private schools
+  have higher rates of exemptions to school immunization requirements than public schools. The
+  Journal of Pediatrics, 165(1), 129–133.  
+  
+Tim Appelhans, Florian Detsch, Christoph Reudenbach and
+  Stefan Woellauer (2020). mapview: Interactive Viewing of
+  Spatial Data in R. R package version 2.9.0.
+  https://CRAN.R-project.org/package=mapview  
+  
+Wickham et al., (2019). Welcome to the tidyverse. Journal of
+  Open Source Software, 4(43), 1686,
+  https://doi.org/10.21105/joss.01686
+  
+Yihui Xie (2020). knitr: A General-Purpose Package for
+  Dynamic Report Generation in R. R package version 1.29.
+
+  Yihui Xie (2015) Dynamic Documents with R and knitr. 2nd
+  edition. Chapman and Hall/CRC. ISBN 978-1498716963
+
+  Yihui Xie (2014) knitr: A Comprehensive Tool for Reproducible
+  Research in R. In Victoria Stodden, Friedrich Leisch and
+  Roger D. Peng, editors, Implementing Reproducible
+  Computational Research. Chapman and Hall/CRC. ISBN
+  978-1466561595
+  
+
+
+
+
+
+
+
+
