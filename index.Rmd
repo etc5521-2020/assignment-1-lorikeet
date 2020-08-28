@@ -335,7 +335,7 @@ The state with the highest overall vaccination rate is North Caroline at 96.779%
 
 ## What is the average income in the states with the highest and lowest vaccination rate?
 
-To analyse the average income of the states with the highest and lowest vaccination rate, an external dataset from Tax Foundation was retrieved (add link!!). This data was merged with the measles data grouped by state, and the top and bottom five observations were tabulated for both the vaccination rates. The vaccination rate and income data were plotted using _geom_col_ and _gg_arrange_, and ordered in descending order. 
+To analyse the average income of the states with the highest and lowest vaccination rate, an external dataset from [Tax Foundation:Github Repository](https://github.com/TaxFoundation/facts-and-figures) was retrieved. This data was merged with the measles data grouped by state, and the top and bottom five observations were tabulated for both the vaccination rates. The vaccination rate and income data were plotted using _geom_col_ and _gg_arrange_, and ordered in descending order. 
 
 ```{r measles-density-income}
 measles_density_mmr_income <- measles_density_mmr %>% 
@@ -383,7 +383,7 @@ measles_density_mmr_income %>%
   kable_styling()
 ```
 
-The states with the highest MMR vaccination rate were; Illinois, Pennsylvania, Utah, Colorado and New York. These states each have an average per capita income of $56,839,	$56,225, $46,320, $58,456 and $68,668, respectively, as shown in the plot below.
+The states with the highest MMR vaccination rate were; Illinois, Pennsylvania, Utah, Colorado and New York. These states each have an average per capita income of \$56,839,	\$56,225, \$46,320, \$58,456 and \$68,668, respectively, as shown in the plot below.
 
 ```{r mmr-income-plot}
 p_mmr_income <- ggplot(measles_density_mmr_income, 
@@ -485,11 +485,10 @@ ggarrange(p_overall,
 The analysis has revealed that it is likely that there is no association with socioeconomic status and vaccination rates. Private schools, which are more expensive than public schools thus inferring greater socioeconomic status, have a lower average MMR and average overall vaccination rate than their public counterparts. The two states with the lowest MMR vaccination rate; Connecticut and Massachusetts, had the two highest average per capita incomes. Similarly, Washington had the lowest overall vaccination rate and one of the highest average per capita incomes. Therefore, it is unlikely that vaccination rate improves with socioeconomic status. 
 
 # References
-Add data and software and order in alphabetical
-- 2 datasets - tax foundation, measles 
--tidy 
-https://github.com/TaxFoundation/facts-and-figures
 
+Mock, T. (2018). TidyTuesday–W weekly social data project in R. URL: https://github. com/rfordatascience/tidytuesday, 3.
+
+Foundation, . (2016). facts-and-figures. GitHub repository. Retrieved from https://github.com/TaxFoundation/facts-and-figures
 
 Alboukadel Kassambara (2020). ggpubr: 'ggplot2' Based
   Publication Ready Plots. R package version 0.4.0.
