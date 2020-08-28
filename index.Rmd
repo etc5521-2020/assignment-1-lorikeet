@@ -486,25 +486,21 @@ The analysis has revealed that it is likely that there is no association with so
 
 # References
 
-Mock, T. (2018). TidyTuesday–W weekly social data project in R. URL: https://github. com/rfordatascience/tidytuesday, 3.
-
-VanAntwerp, T. (2016). TaxFoundation facts-and-figures. GitHub repository. Retrieved from https://github.com/TaxFoundation/facts-and-figures
-
 Alboukadel Kassambara (2020). ggpubr: 'ggplot2' Based
   Publication Ready Plots. R package version 0.4.0.
   https://CRAN.R-project.org/package=ggpubr
   
-Barrabeig, I., Rovira, A., Rius, C., Muñoz, P., Soldevila, N., Batalla, J., & Domínguez, A.
-  (2011). Effectiveness of measles vaccination for control of exposed children. The Pediatric
-  Infectious Disease Journal, 30(1), 78–80.
+Barrabeig, I., Rovira, A., Rius, C., Muñoz, P., Soldevila, N., Batalla, J., &
+  Domínguez, A. (2011). Effectiveness of measles vaccination for control of exposed children. The
+  Pediatric Infectious Disease Journal, 30(1), 78–80.
 
 C. Sievert. Interactive Web-Based Data Visualization with R,
   plotly, and shiny. Chapman and Hall/CRC Florida, 2020.
 
-Cockcroft, A., Usman, M. U., Nyamucherera, O. F., Emori, H., Duke, B., Umar, N. A., &
-  Andersson, N. (2014). Why children are not vaccinated against measles: a cross-sectional
-  study in two Nigerian States. Archives of Public Health = Archives Belges de Sante Publique,
-  72(1), 48.
+Cockcroft, A., Usman, M. U., Nyamucherera, O. F., Emori, H., Duke, B., Umar, N.
+  A., & Andersson, N. (2014). Why children are not vaccinated against measles: a
+  cross-sectional study in two Nigerian States. Archives of Public Health = Archives Belges de Sante
+  Publique, 72(1), 48.
 
 Commonwealth of Australia. (2020, May 27). Measles. Retrieved 25 August 2020, from
   https://www.health.gov.au/health-topics/measles#what-is-measles
@@ -524,6 +520,9 @@ Kamil Slowikowski (2020). ggrepel: Automatically Position
   Non-Overlapping Text Labels with 'ggplot2'. R package version
   0.8.2. https://CRAN.R-project.org/package=ggrepel
   
+Mock, T. (2018). TidyTuesday–W weekly social data project in R. URL:
+  https://github. com/rfordatascience/tidytuesday, 3.  
+
 Nicholas Tierney, Di Cook, Miles McBain and Colin Fay (2020).
   naniar: Data Structures, Summaries, and Visualisations for
   Missing Data. R package version 0.5.2.
@@ -539,7 +538,8 @@ Pebesma, E., 2018. Simple Features for R: Standardized
   439-446, https://doi.org/10.32614/RJ-2018-009  
   
 Phadke, V. K., Bednarczyk, R. A., Salmon, D. A., & Omer, S. B. (2016). Association Between
-  Vaccine Refusal and Vaccine-Preventable Diseases in the United States: A Review of Measles    and Pertussis. JAMA: The Journal of the American Medical Association, 315(11), 1149–1158. 
+  Vaccine Refusal and Vaccine-Preventable Diseases in the United States: A Review of Measles and
+  Pertussis. JAMA: The Journal of the American Medical Association, 315(11), 1149–1158. 
   
 Queensland Health. (2019, October 22). What is measles and why do we vaccinate against it?
   Retrieved 25 August 2020, from
@@ -562,7 +562,10 @@ Tim Appelhans, Florian Detsch, Christoph Reudenbach and
   Stefan Woellauer (2020). mapview: Interactive Viewing of
   Spatial Data in R. R package version 2.9.0.
   https://CRAN.R-project.org/package=mapview  
-  
+
+VanAntwerp, T. (2016). TaxFoundation facts-and-figures. GitHub repository.
+  Retrieved from https://github.com/TaxFoundation/facts-and-figures
+
 Wickham et al., (2019). Welcome to the tidyverse. Journal of
   Open Source Software, 4(43), 1686,
   https://doi.org/10.21105/joss.01686
