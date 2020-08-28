@@ -488,7 +488,7 @@ The analysis has revealed that it is likely that there is no association with so
 
 Mock, T. (2018). TidyTuesday–W weekly social data project in R. URL: https://github. com/rfordatascience/tidytuesday, 3.
 
-Foundation, . (2016). facts-and-figures. GitHub repository. Retrieved from https://github.com/TaxFoundation/facts-and-figures
+VanAntwerp, T. (2016). TaxFoundation facts-and-figures. GitHub repository. Retrieved from https://github.com/TaxFoundation/facts-and-figures
 
 Alboukadel Kassambara (2020). ggpubr: 'ggplot2' Based
   Publication Ready Plots. R package version 0.4.0.
