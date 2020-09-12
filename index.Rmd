@@ -33,14 +33,19 @@ library(maps)
 library(tools)
 library(ggpubr)
 library(plotly)
+library(here)
 ```
 
 ```{r load-data}
-# Read in data 
-measles <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-25/measles.csv')
+# Read in data from github
+#measles <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-25/measles.csv')
 
-state_income <- readr::read_csv('https://raw.githubusercontent.com/TaxFoundation/facts-and-figures/master/42-income-per-capita-by-state.csv') %>%
-  filter(id != 0)
+#state_income <- readr::read_csv('https://raw.githubusercontent.com/TaxFoundation/facts-and-figures/master/42-income-per-capita-by-state.csv') %>%
+  #filter(id != 0)
+
+#Read in data from repo
+measles <- read_csv(here::here("data/measles.csv"))
+state_income <- read_csv(here::here("data/state_income.csv"))
 ```
 
 # Introduction and motivation
