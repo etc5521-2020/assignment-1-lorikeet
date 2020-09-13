@@ -51,6 +51,14 @@ educational_attainment <- read_csv(here::here("data/educational_attainment.csv")
 migration <- read_csv(here::here("data/migration.csv"))
 ```
 
+```{r data-wrangling}
+measles <- measles %>%
+  # remove missing data
+  filter(type != "NA",
+         mmr != -1,
+         overall != -1)
+```
+
 
 # Introduction and motivation
 
@@ -95,52 +103,41 @@ The measles data was filtered to remove missing school type, overall vaccination
 ```{r school-type-average}
 school_type_average <- 
   measles %>%
-  # remove missing data
-  filter(type != "NA",
-         mmr != -1,
-         overall != -1) %>%
   # group by type of school
   group_by(type) %>%
   # calculate the average mmr rate and overall rate according to type of school
-  summarise(average_mmr_rate = mean(mmr),
-            average_vacc_rate = mean(overall))%>%
-  select(type,average_mmr_rate)
-```
+  summarise(average_mmr_rate = mean(mmr))
 
-```{r summary-overall-mmr}
 school_type_average %>%
   # convert rates to a percentage
   mutate(average_mmr_rate = percent(average_mmr_rate/100)) %>%
+  arrange(desc(average_mmr_rate)) %>% 
   # change column names
   kable(col.names = c("Type",
                       "Average MMR Vaccination Rate"),
         # add a caption
-        caption = "Comparison of both Average Vaccination Rates according to School Type") %>%
-  kable_styling(full_width = TRUE)
+        caption = "Comparison of MMR Average Vaccination Rates according to School Type",
+        align = c("l","r")) %>%
+  kable_styling()
 ```
 
+```{r school-type-plot, fig.cap="Box plot of School's MMR Vaccination Rates by School Types}
+mmr_mean <- round(mean(measles$mmr))
 
-```{r school-type}
-school_type <- 
-  measles %>%
-  # remove missing data
-  filter(type != "NA",
-         mmr != -1,
-         overall != -1) %>%
-  # group by type of school
-  group_by(type)%>%
-  mutate(averageMMR = mean(mmr))
+measles %>% 
+  ggplot(aes(x = mmr,
+             y = as.factor(type))) +
+  geom_boxplot(fill = "darkcyan",
+               alpha = 0.2)+
+  labs(subtitle = "The mean of school's MMR vaccination rate is shown by the red line") +
+  xlab("MMR vaccination Rate") +
+  ylab("Type of School") +
+  ggtitle("The School's MMR Vaccination Rate") +
+  geom_vline(xintercept = mmr_mean, color = "red") +
+  scale_x_continuous(breaks = c(0, 25, 50, 75, 95, 100)) +
+  theme_bw()
 ```
 
-
-```{r vacc-rates-ggplot}
-ggplot(school_type ,
-         aes(x = type,
-             y = mmr)) +geom_boxplot(aes(fill=type))+
-  #geom_vline(average = averageMMR)+
-
-  facet_wrap(~type,scales="free")+xlab("Type of school")+ylab("MMR vaccination Rate")+ggtitle("The school MMr vaccination Rate")
-```
 The MMR vaccination rate was the highest in public schools, as seen in the table above. This is consistent with findings from a study conducted by Shaw (2014) where it was found that private schools have higher rates of exemptions for immunisations than public schools.
 
 
