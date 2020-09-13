@@ -103,7 +103,8 @@ school_type_average <-
   group_by(type) %>%
   # calculate the average mmr rate and overall rate according to type of school
   summarise(average_mmr_rate = mean(mmr),
-            average_vacc_rate = mean(overall)) 
+            average_vacc_rate = mean(overall))%>%
+  select(type,average_mmr_rate)
 ```
 
 ```{r ggplot-MMR-school-type}
@@ -134,12 +135,10 @@ The _school_type_average_ data was tabulated to compare the overall vaccination 
 ```{r summary-overall-mmr}
 school_type_average %>%
   # convert rates to a percentage
-  mutate(average_mmr_rate = percent(average_mmr_rate/100),
-         average_vacc_rate = percent(average_vacc_rate/100)) %>%
+  mutate(average_mmr_rate = percent(average_mmr_rate/100)) %>%
   # change column names
   kable(col.names = c("Type",
-                      "Average MMR Vaccination Rate",
-                      "Average Overall Vaccination Rate"),
+                      "Average MMR Vaccination Rate"),
         # add a caption
         caption = "Comparison of both Average Vaccination Rates according to School Type") %>%
   kable_styling(full_width = TRUE)
