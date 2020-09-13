@@ -81,14 +81,14 @@ The individual state dataset was scraped from the Tidy Tuesday Github repository
 
 **Secondary Questions**:
 
-- Are the MMR vaccination rates higher in private schools?
+- Does MMR Vaccination Rates Differ Across School Types?
 - How does the MMR vaccination rate compare to the school's overall vaccination rate?
 - Which states have the highest and lowest vaccination rates?
 - What is the average income in the states with the highest and lowest vaccination rate?
 
 # Analysis and findings
 
-## Are the MMR vaccination rates higher in private schools?
+## Does MMR Vaccination Rates Differ Across School Types?
 
 The measles data was filtered to remove missing school type, overall vaccination rate and MMR rate. It was grouped by type of school and the average MMR vaccination rate and overall vaccination rate was calculated using the _mean_ function. The tibble generated was named _school_type_average_. Then, the average MMR rates from the  _school_type_average_ tibble were plotted. The rates were annotated accordingly, to draw attention to the difference between the MMR vaccination rate for each school type. 
 
@@ -107,31 +107,6 @@ school_type_average <-
   select(type,average_mmr_rate)
 ```
 
-```{r ggplot-MMR-school-type}
-ggplot(school_type_average,
-       aes(x = "",
-           y = average_mmr_rate,
-           group = type)) +
-  geom_bar(stat = "identity", width = 1) +
-  facet_wrap(~type) +
-  # convert to a pie chart
-  coord_polar("y", start = 0) +
-  # get rid of axis labels
-  theme_void() +
-  # add a percentage label to each segment which is colour co-ordinated
-  geom_label_repel(label = percent(school_type_average$average_mmr_rate/100),
-                  size= 3,
-                   show.legend = F) +
-  # add a title
-  ggtitle("The Average MMR Vaccination Rate according to School Type")
-```
-
-The overall vaccination rate and the MMR vaccination rate was the highest in public schools, as seen in the pie chart above. This is consistent with findings from a study conducted by Shaw (2014) where it was found that private schools have higher rates of exemptions for immunisations than public schools.
-
-## How does the MMR vaccination rate compare to the school's overall vaccination rate?
-
-The _school_type_average_ data was tabulated to compare the overall vaccination rate and MMR vaccination rate. Then, both rates were plotted according to school type. 
-
 ```{r summary-overall-mmr}
 school_type_average %>%
   # convert rates to a percentage
@@ -144,6 +119,7 @@ school_type_average %>%
   kable_styling(full_width = TRUE)
 ```
 
+
 ```{r school-type}
 school_type <- 
   measles %>%
@@ -154,14 +130,8 @@ school_type <-
   # group by type of school
   group_by(type)%>%
   mutate(averageMMR = mean(mmr))
-  # calculate the average mmr rate and overall rate according to type of school
-  
-  
-  
- school_type
 ```
 
-When comparing the vaccination rates according to school type, it is clear that the overall vaccination rate is lower than the MMR vaccination rate for all school types as seen in the plot below. Public schools have the highest overall vaccination rate and MMR rate. 
 
 ```{r vacc-rates-ggplot}
 ggplot(school_type ,
@@ -171,6 +141,18 @@ ggplot(school_type ,
 
   facet_wrap(~type,scales="free")+xlab("Type of school")+ylab("MMR vaccination Rate")+ggtitle("The school MMr vaccination Rate")
 ```
+The MMR vaccination rate was the highest in public schools, as seen in the table above. This is consistent with findings from a study conducted by Shaw (2014) where it was found that private schools have higher rates of exemptions for immunisations than public schools.
+
+
+## How does the MMR vaccination rate compare to the school's overall vaccination rate?
+
+The _school_type_average_ data was tabulated to compare the overall vaccination rate and MMR vaccination rate. Then, both rates were plotted according to school type. 
+
+
+
+When comparing the vaccination rates according to school type, it is clear that the overall vaccination rate is lower than the MMR vaccination rate for all school types as seen in the plot below. Public schools have the highest overall vaccination rate and MMR rate. 
+
+
 
 
 ## Which states have the highest and lowest vaccination rates?
