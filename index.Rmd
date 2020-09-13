@@ -52,11 +52,10 @@ migration <- read_csv(here::here("data/migration.csv"))
 ```
 
 ```{r data-wrangling}
-measles <- measles %>%
+measles_type <- measles %>%
   # remove missing data
   filter(type != "NA",
-         mmr != -1,
-         overall != -1)
+         mmr != -1)
 ```
 
 
@@ -102,7 +101,7 @@ The measles data was filtered to remove missing school type, overall vaccination
 
 ```{r school-type-average}
 school_type_average <- 
-  measles %>%
+  measles_type %>%
   # group by type of school
   group_by(type) %>%
   # calculate the average mmr rate and overall rate according to type of school
@@ -122,9 +121,9 @@ school_type_average %>%
 ```
 
 ```{r school-type-plot, fig.cap="Box plot of School's MMR Vaccination Rates by School Types}
-mmr_mean <- round(mean(measles$mmr))
+mmr_mean <- round(mean(measles_type$mmr))
 
-measles %>% 
+measles_type %>% 
   ggplot(aes(x = mmr,
              y = as.factor(type))) +
   geom_boxplot(fill = "darkcyan",
@@ -199,8 +198,8 @@ usa_measles_states <- merge(usa_measles_states,
   arrange(order)
 
 # filter the missing data out
-usa_measles_states_overall <- usa_measles_states %>%
-  filter(overall > 0)
+#usa_measles_states_overall <- usa_measles_states %>%
+  #filter(overall > 0)
 
 usa_measles_states_mmr <- usa_measles_states %>%
   filter(mmr > 0)
@@ -209,7 +208,7 @@ usa_measles_states_mmr <- usa_measles_states %>%
 ```{r mmr-map}
 # MMR vaccination rate across the states
 # add ggplotly to make the plot interactive
-mmr_p <- ggplotly(ggplot(usa_measles_states_mmr, aes(long, 
+mmr_p <- ggplot(usa_measles_states_mmr, aes(long, 
                                             lat, 
                                             group=group, 
                                             fill=mmr)) +
@@ -222,56 +221,10 @@ mmr_p <- ggplotly(ggplot(usa_measles_states_mmr, aes(long,
     # add title and x and y axis and remove the legend
   ggtitle("MMR Vaccination Rate across States") +
   xlab("Latitude") +
-  ylab("Longitude") + 
-  theme(legend.position = "none"))
-mmr_p
-```
-
-```{r overall-map}
-# Overall vaccination rate across states
-# add ggplotly to make the plot interactive
-overall_p <- ggplotly(ggplot(usa_measles_states_overall, 
-                    aes(long, 
-                        lat, 
-                        group=group, 
-                        fill=overall)) +
-  geom_polygon(color="light grey")+
-  geom_text(aes(X, Y, label = abb), 
-            size = 4,
-            color="white",
-            family="sans") +
-    # add a title and x and y axis
-  ggtitle("Overall Vaccination Rate Across States") +
-  xlab("Latitude") +
   ylab("Longitude") +
-    # remove the legend
-  theme(legend.position = "none"))
-overall_p
-```
-
-```{r overall-state-plot}
-measles_density_overall <- measles_density %>%
-  filter(overall > 0)
-
-p_overall <- ggplot(measles_density_overall, 
-                    aes(y = fct_reorder(state,
-                                        overall), 
-                        x = overall,
-                        # fill according to overall vaccination rate
-                        fill = overall)) +
-  geom_col() +
-  # add x and y axis labels
-  xlab("Overall Vaccination Rate") +
-  ylab("") +
-  #remove axis ticks, legend and panel background
-  theme(axis.ticks = element_blank(),
-        panel.background = element_blank(),
-        legend.position = "none") +
-  # label the plot with percentages
-  geom_label_repel(label = percent(measles_density_overall$overall/100),
-                  size= 2,
-                  color = "white",
-                  show.legend = F) 
+  theme_bw()
+  #theme(legend.position = "none"))
+ggplotly(mmr_p)
 ```
 
 ```{r mmr-state-plot}
@@ -559,11 +512,53 @@ Yihui Xie (2020). knitr: A General-Purpose Package for
   Computational Research. Chapman and Hall/CRC. ISBN
   978-1466561595
   
+# Discarded Codes
 
+```{r overall-map, include=FALSE}
+# Overall vaccination rate across states
+# add ggplotly to make the plot interactive
+overall_p <- ggplotly(ggplot(usa_measles_states_overall, 
+                    aes(long, 
+                        lat, 
+                        group=group, 
+                        fill=overall)) +
+  geom_polygon(color="light grey")+
+  geom_text(aes(X, Y, label = abb), 
+            size = 4,
+            color="white",
+            family="sans") +
+    # add a title and x and y axis
+  ggtitle("Overall Vaccination Rate Across States") +
+  xlab("Latitude") +
+  ylab("Longitude") +
+    # remove the legend
+  theme(legend.position = "none"))
+overall_p
+```
 
+```{r overall-state-plot, include=FALSE}
+measles_density_overall <- measles_density %>%
+  filter(overall > 0)
 
-
-
-
+p_overall <- ggplot(measles_density_overall, 
+                    aes(y = fct_reorder(state,
+                                        overall), 
+                        x = overall,
+                        # fill according to overall vaccination rate
+                        fill = overall)) +
+  geom_col() +
+  # add x and y axis labels
+  xlab("Overall Vaccination Rate") +
+  ylab("") +
+  #remove axis ticks, legend and panel background
+  theme(axis.ticks = element_blank(),
+        panel.background = element_blank(),
+        legend.position = "none") +
+  # label the plot with percentages
+  geom_label_repel(label = percent(measles_density_overall$overall/100),
+                  size= 2,
+                  color = "white",
+                  show.legend = F) 
+```
 
 
