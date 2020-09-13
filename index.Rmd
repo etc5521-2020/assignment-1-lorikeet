@@ -144,42 +144,32 @@ school_type_average %>%
   kable_styling(full_width = TRUE)
 ```
 
-```{r compare-vacc-rates}
-vacc_rates <- school_type_average %>%
-   rename(MMR = average_mmr_rate,
-         Overall = average_vacc_rate) %>%
-  # pivot the table longer so that it can be used easily when plotting
-  pivot_longer(cols = c("Overall", "MMR"),
-               names_to = "vaccine_type",
-               values_to = "rate") 
+```{r school-type}
+school_type <- 
+  measles %>%
+  # remove missing data
+  filter(type != "NA",
+         mmr != -1,
+         overall != -1) %>%
+  # group by type of school
+  group_by(type)%>%
+  mutate(averageMMR = mean(mmr))
+  # calculate the average mmr rate and overall rate according to type of school
+  
+  
+  
+ school_type
 ```
 
 When comparing the vaccination rates according to school type, it is clear that the overall vaccination rate is lower than the MMR vaccination rate for all school types as seen in the plot below. Public schools have the highest overall vaccination rate and MMR rate. 
 
 ```{r vacc-rates-ggplot}
-ggplot(vacc_rates,
-         aes(x = vaccine_type,
-             y = rate,
-             group = type,
-             fill = rate)) +
-  geom_col() +
-  # facet wrap by school type
-  facet_wrap(~type) +
-  # add x and y axis 
-  xlab("Type of Vaccination") + 
-  ylab("Average Vaccination Rate") +
-  # get rid of background 
-  theme(axis.ticks = element_blank(),
-        panel.background = element_blank(),
-        axis.text.y = element_blank(),
-        legend.position = "none") +
-  # add percentage labels
-  geom_label_repel(label = percent(vacc_rates$rate/100),
-                  size= 3,
-                  color = "white",
-                  show.legend = F) +
-  # add a title to the plot
-  ggtitle("Comparison of both Average Vaccination Rates according to School Type")
+ggplot(school_type ,
+         aes(x = type,
+             y = mmr)) +geom_boxplot(aes(fill=type))+
+  #geom_vline(average = averageMMR)+
+
+  facet_wrap(~type,scales="free")+xlab("Type of school")+ylab("MMR vaccination Rate")+ggtitle("The school MMr vaccination Rate")
 ```
 
 
