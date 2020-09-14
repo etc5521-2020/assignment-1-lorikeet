@@ -89,7 +89,7 @@ The individual state dataset was scraped from the Tidy Tuesday Github repository
 **Secondary Questions**:
 
 - Does MMR Vaccination Rates Differ Across School Types?
-- How does the MMR vaccination rate compare to the school's overall vaccination rate?
+- How Does School's MMR Vaccination Rate Compare to the School's Overall Vaccination Rate?
 - Which states have the highest and lowest vaccination rates?
 - What is the average income in the states with the highest and lowest vaccination rate?
 
@@ -104,7 +104,7 @@ school_type_average <-
   measles_type %>%
   # group by type of school
   group_by(type) %>%
-  # calculate the average mmr rate and overall rate according to type of school
+  # calculate the average mmr rate l
   summarise(average_mmr_rate = mean(mmr))
 
 school_type_average %>%
@@ -140,12 +140,34 @@ measles_type %>%
 The MMR vaccination rate was the highest in public schools, as seen in the table above. This is consistent with findings from a study conducted by Shaw (2014) where it was found that private schools have higher rates of exemptions for immunisations than public schools.
 
 
-## How does the MMR vaccination rate compare to the school's overall vaccination rate?
+## How Does School's MMR Vaccination Rate Compare to the School's Overall Vaccination Rate?
 
 The _school_type_average_ data was tabulated to compare the overall vaccination rate and MMR vaccination rate. Then, both rates were plotted according to school type. 
+```{r school-type-average}
+school_vs_overall <- 
+  measles %>%
+  # remove missing data
+  filter(type != "NA",
+         mmr != -1,
+         overall != -1) %>%
+  # group by type of school
+  group_by(type) %>%
+  # calculate the average mmr rate and overall rate according to type of school
+  summarise(school_mmr_rate = mean(mmr),
+            school_overall_rate = mean(overall)) 
 
 
-
+school_vs_overall %>%
+  # convert rates to a percentage
+  mutate(school_mmr_rate = percent(school_mmr_rate/100)) %>%
+  mutate(school_overall_rate = percent(school_overall_rate/100))%>%
+  kable(col.names = c("Type",
+                      "School MMR Vaccination Rate","school overall Vaccination Rate"),
+        # add a caption
+        caption = "School MMR Vaccination Rate vs School Overall Vaccination Rate",
+        align = c("l","r")) %>%
+  kable_styling()
+```
 When comparing the vaccination rates according to school type, it is clear that the overall vaccination rate is lower than the MMR vaccination rate for all school types as seen in the plot below. Public schools have the highest overall vaccination rate and MMR rate. 
 
 
