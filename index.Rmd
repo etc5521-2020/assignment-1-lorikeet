@@ -143,7 +143,7 @@ The MMR vaccination rate was the highest in public schools, as seen in the table
 ## How Does School's MMR Vaccination Rate Compare to the School's Overall Vaccination Rate?
 
 The _school_type_average_ data was tabulated to compare the overall vaccination rate and MMR vaccination rate. Then, both rates were plotted according to school type. 
-```{r school-type-average}
+```{r school vs overall}
 school_vs_overall <- 
   measles %>%
   # remove missing data
