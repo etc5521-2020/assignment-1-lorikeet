@@ -48,7 +48,8 @@ state_income <- state_income %>%
     variable == "B19301_001" ~ "Income Per Capita"
   )) %>%
   separate(NAME, c("county", "na", "state")) %>%
-  select(-na)
+  select(-na) %>%
+  mutate(county_state = str_c(county, ", ", state))
 
 #Saving the per capita income data frame as csv file to github repo
 write.csv(state_income, here::here("data/state_income.csv"))

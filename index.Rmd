@@ -58,6 +58,9 @@ migration <- read_csv(here::here("data/migration.csv"))
 ```
 
 ```{r data-wrangling}
+measles <- measles %>% 
+  mutate(county_state = str_c(county, ", ", state))
+
 measles_type <- measles %>%
   # remove missing data
   filter(type != "NA",
@@ -232,6 +235,14 @@ measles_diff %>%
   scale_y_continuous() +
   ylim(0,20) +
   theme_bw()
+
+measles_diff %>% 
+  ggplot(aes(x = enroll,
+             y = rdiff)) +
+  geom_point() +
+  geom_smooth() +
+  xlim(0,400) +
+  theme_bw()
 ```
 
 The _school_type_average_ data was tabulated to compare the overall vaccination rate and MMR vaccination rate. Then, both rates were plotted according to school type. 
@@ -330,26 +341,25 @@ To analyse the average income of the states with the highest and lowest vaccinat
 measles_density <- measles %>%
   filter(county != "#N/A",
          mmr != -1) %>% 
-  group_by(county, state) %>%
+  group_by(county_state) %>%
   summarise(mmr = mean(mmr),
             overall = mean(overall),
             count = n())
 
 measles_density_income <- measles_density %>% 
   left_join(state_income,
-            by = "county") %>% 
-  select(-state.y) %>% 
-  rename(state = state.x,
-         percapita_income = estimate)
+            by = "county_state") %>% 
+  rename(percapita_income = estimate)
 
 measles_density_income %>% 
+  filter(percapita_income != "NA") %>% 
   ggplot(aes(x = percapita_income,
              y = mmr)) +
   geom_point(data = select(measles_density_income, -state),
              color = "gray") + 
   geom_point(aes(color = state)) +
   geom_smooth(method = lm, se = FALSE) +
-  ylim(80,100) +
+  ylim(60,100) +
   facet_wrap(~state) +
   scale_color_discrete_qualitative() + 
   guides(color = FALSE) +
