@@ -35,6 +35,12 @@ library(tools)
 library(ggpubr)
 library(plotly)
 library(here)
+library(patchwork)
+library(ggExtra)
+library(ggridges)
+library(viridis)
+library(cowplot)
+library(colorspace)
 ```
 
 ```{r load-data}
@@ -95,6 +101,38 @@ The individual state dataset was scraped from the Tidy Tuesday Github repository
 
 # Analysis and findings
 
+```{r ida}
+g <- ggplot(measles_type, aes(mmr))
+
+g1 <- g + geom_histogram(binwidth = 1) + 
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+
+g2 <- g + geom_boxplot()  + 
+  theme(axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank())
+
+g3 <- g + geom_density()
+
+g1 + g2 + g3 + plot_layout(ncol = 1) +
+  xlim(92,100)
+
+
+ggplot(measles_type, aes(x = mmr,
+                         y = ..density..)) +
+  geom_histogram(binwidth = 0.2) + 
+  geom_density() +
+  xlim(92,100)
+
+ggplot(measles_type, aes(x = mmr,
+                         y = ..density..,
+                         fill = type)) +
+  geom_density() +
+  xlim(92,100)
+```
+
 ## Does MMR Vaccination Rates Differ Across School Types?
 
 The measles data was filtered to remove missing school type, overall vaccination rate and MMR rate. It was grouped by type of school and the average MMR vaccination rate and overall vaccination rate was calculated using the _mean_ function. The tibble generated was named _school_type_average_. Then, the average MMR rates from the  _school_type_average_ tibble were plotted. The rates were annotated accordingly, to draw attention to the difference between the MMR vaccination rate for each school type. 
@@ -120,12 +158,12 @@ school_type_average %>%
   kable_styling()
 ```
 
-```{r school-type-plot, fig.cap="Box plot of School's MMR Vaccination Rates by School Types}
+```{r school-type-plot, fig.cap="Box plot of School's MMR Vaccination Rates by School Types"}
 mmr_mean <- round(mean(measles_type$mmr))
 
 measles_type %>% 
   ggplot(aes(x = mmr,
-             y = as.factor(type))) +
+             y = reorder(as.factor(type), mmr))) +
   geom_boxplot(fill = "darkcyan",
                alpha = 0.2)+
   labs(subtitle = "The mean of school's MMR vaccination rate is shown by the red line") +
@@ -142,52 +180,81 @@ The MMR vaccination rate was the highest in public schools, as seen in the table
 
 ## How Does School's MMR Vaccination Rate Compare to the School's Overall Vaccination Rate?
 
-The _school_type_average_ data was tabulated to compare the overall vaccination rate and MMR vaccination rate. Then, both rates were plotted according to school type. 
-```{r school vs overall}
-school_vs_overall <- 
-  measles %>%
+```{r vacc-diff}
+measles_diff <-  measles %>%
   # remove missing data
   filter(type != "NA",
          mmr != -1,
-         overall != -1) %>%
+         overall != -1) %>% 
+  mutate(rdiff = mmr - overall)
+
+school_vs_overall <- measles_diff %>%
   # group by type of school
   group_by(type) %>%
   # calculate the average mmr rate and overall rate according to type of school
   summarise(school_mmr_rate = mean(mmr),
-            school_overall_rate = mean(overall)) 
+            school_overall_rate = mean(overall),
+            rate_diff = mean(rdiff)) 
 
 
 school_vs_overall %>%
   # convert rates to a percentage
-  mutate(school_mmr_rate = percent(school_mmr_rate/100)) %>%
-  mutate(school_overall_rate = percent(school_overall_rate/100))%>%
-  kable(col.names = c("Type",
-                      "School MMR Vaccination Rate","school overall Vaccination Rate"),
+  mutate(school_mmr_rate = percent(school_mmr_rate/100),
+         school_overall_rate = percent(school_overall_rate/100),
+         rate_diff = percent(rate_diff/100)) %>%
+  kable(col.names = c("School Type",
+                      "School MMR Vaccination Rate",
+                      "School Overall Vaccination Rate",
+                      "Rate Differences"),
         # add a caption
-        caption = "School MMR Vaccination Rate vs School Overall Vaccination Rate",
-        align = c("l","r")) %>%
+        caption = "School's MMR Vaccination Rate and Overall Vaccination Rate Comparison") %>%
   kable_styling()
 ```
+
+```{r vac-diff-plot}
+measles_diff %>% 
+  ggplot(aes(x = type,
+             y = rdiff)) +
+  geom_violin(fill = "darkcyan", 
+              alpha = 0.2) +
+  geom_boxplot(width = 0.02, 
+               fill = "darkorange", 
+               alpha = 0.5) +
+  scale_y_continuous() +
+  ylim(0,20) +
+  theme_bw()
+
+measles_diff %>% 
+  ggplot(aes(x = type,
+             y = rdiff)) +
+  geom_violin(fill = "darkcyan", 
+              alpha = 0.2) +
+  scale_y_continuous() +
+  ylim(0,20) +
+  theme_bw()
+```
+
+The _school_type_average_ data was tabulated to compare the overall vaccination rate and MMR vaccination rate. Then, both rates were plotted according to school type. 
+
 When comparing the vaccination rates according to school type, it is clear that the overall vaccination rate is lower than the MMR vaccination rate for all school types as seen in the plot below. Public schools have the highest overall vaccination rate and MMR rate. 
 
 
-
-
-## Which states have the highest and lowest vaccination rates?
+## Which states have lowest vaccination rates?
 
 The measles data was grouped by state and then the average MMR and overall vaccination rate were calculated. Then, the _map_data_ function was used to create a tibble containing the geographical information of each state. This data was merged with the _measles_states_ data, which contains the average MMR and overall vaccination rate for each state. Any missing data or negative values were removed and the remaining data was plotted onto a map and bar chart using _geom_polygon_ and _geom_col_, respectively. The _ggplotly_ function was used to make the maps interactive. 
 
 
 ```{r density-summary}
 # Measles vaccination across all American states and school count
-measles_density <- measles %>%
+measles_density_90 <- measles %>%
+  filter(mmr < 90) %>% 
   group_by(state) %>%
   summarise(mmr = mean(mmr),
             overall = mean(overall),
             count = n())
 
 # Measles vaccination across state
-measles_states <- measles_density[c("state", 
+measles_states_90 <- measles_density_90[c("state", 
                                     "mmr", 
                                     "overall")] %>%
   rename(region = state) %>%
@@ -200,7 +267,7 @@ usa <- map_data("state")
 
 # Merging usa map data with measles across state data
 usa_measles_states <- merge(usa, 
-                            measles_states, 
+                            measles_states_90, 
                             all.x = TRUE)
 
 # finding centroids and abb of each state
@@ -240,8 +307,9 @@ mmr_p <- ggplot(usa_measles_states_mmr, aes(long,
             size = 4,
             color = "white",
             family = "sans") +
+  scale_fill_viridis() +
     # add title and x and y axis and remove the legend
-  ggtitle("MMR Vaccination Rate across States") +
+  ggtitle("The Number of Schools with MMR Vaccination Rate Below 90% across States") +
   xlab("Latitude") +
   ylab("Longitude") +
   theme_bw()
@@ -249,39 +317,7 @@ mmr_p <- ggplot(usa_measles_states_mmr, aes(long,
 ggplotly(mmr_p)
 ```
 
-```{r mmr-state-plot}
-measles_density_mmr <- measles_density %>%
-  filter(mmr > 0)
-
-p_mmr <- ggplot(measles_density_mmr, 
-                aes(y = fct_reorder(state, 
-                                    mmr),
-                    x = mmr,
-                    # fill according to mmr vaccination rate
-                    fill = mmr)) +
-  geom_col() +
-  # add x and y axis labels
-  xlab("MMR Vaccination Rate") +
-  ylab("") +
-  #remove axis ticks, legend and panel background
-  theme(axis.ticks = element_blank(),
-        panel.background = element_blank(),
-        legend.position = "none") +
-  # label the plot with percentages
-  geom_label_repel(label = percent(measles_density_mmr$mmr/100),
-                  size= 2,
-                  color = "white",
-                  show.legend = F) 
-```
-
 The state with the highest MMR vaccination rate is Illinois at 97.39% and the state with the lowest MMR vaccination rate is Massachusetts at 57.68% as shown in the figure below. 
-
-```{r arrange-mmr-overall, fig.cap="**The Overall and MMR Vaccination Rate, according to State**"}
-# arrange both plots so they appear side-by-side
-ggpubr::ggarrange(p_overall, 
-                  p_mmr, 
-                  nrow=1)
-```
 
 The state with the highest overall vaccination rate is North Caroline at 96.779%, while the state with the lowest vaccination rate is Washington at 75.238% as shown in the figure above. It is difficult to compare the individual states MMR vaccination rate with the overall vaccination rate due to the missing data. However, California, Vermont, Ohio and Oregon have similar MMR and overall vaccination rates. 
 
@@ -290,25 +326,48 @@ The state with the highest overall vaccination rate is North Caroline at 96.779%
 To analyse the average income of the states with the highest and lowest vaccination rate, an external dataset from [Tax Foundation:Github Repository](https://github.com/TaxFoundation/facts-and-figures) was retrieved. This data was merged with the measles data grouped by state, and the top and bottom five observations were tabulated for both the vaccination rates. The vaccination rate and income data were plotted using _geom_col_ and _gg_arrange_, and ordered in descending order. 
 
 ```{r measles-density-income}
-measles_density_mmr_income <- measles_density_mmr %>% 
-  # merge the data
-  merge(state_income[c("stateName", 
-                       "incomePerCapita")], 
-        by.x = "state", 
-        by.y = "stateName")
+# Measles vaccination across all American states and school count
+measles_density <- measles %>%
+  filter(county != "#N/A",
+         mmr != -1) %>% 
+  group_by(county, state) %>%
+  summarise(mmr = mean(mmr),
+            overall = mean(overall),
+            count = n())
+
+measles_density_income <- measles_density %>% 
+  left_join(state_income,
+            by = "county") %>% 
+  select(-state.y) %>% 
+  rename(state = state.x,
+         percapita_income = estimate)
+
+measles_density_income %>% 
+  ggplot(aes(x = percapita_income,
+             y = mmr)) +
+  geom_point(data = select(measles_density_income, -state),
+             color = "gray") + 
+  geom_point(aes(color = state)) +
+  geom_smooth(method = lm, se = FALSE) +
+  ylim(80,100) +
+  facet_wrap(~state) +
+  scale_color_discrete_qualitative() + 
+  guides(color = FALSE) +
+  theme_bw()
 ```
 
+
 ```{r best-mmr}
-measles_density_mmr_income %>%
+measles_density_income %>%
   select(state, 
          mmr, 
-         incomePerCapita) %>%
+         percapita_income) %>%
   # convert mmr to a percentage
-  mutate(mmr = percent(measles_density_mmr_income$mmr/100)) %>%
+  mutate(mmr = percent(measles_density_income$mmr/100)) %>%
   # rename the column names
   rename(State = state, 
          MMR = mmr, 
-         PCI = incomePerCapita) %>%
+         PCI = percapita_income) %>%
   arrange(desc(MMR)) %>%
   mutate(PCI = dollar(PCI)) %>%
   head(5) %>%
