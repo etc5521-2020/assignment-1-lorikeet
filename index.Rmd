@@ -149,11 +149,11 @@ school_type_average <- measles_type %>%
 
 school_type_average %>%
   # convert rates to a percentage
-  mutate(average_mmr_rate = percent(average_mmr_rate/100)) %>%
+  mutate(average_mmr_rate = round(average_mmr_rate,2)) %>%
   arrange(desc(average_mmr_rate)) %>% 
   # change column names
   kable(col.names = c("Type",
-                      "Average MMR Vaccination Rate"),
+                      "Average MMR Vaccination Rate (%)"),
         # add a caption
         caption = "Comparison of MMR Average Vaccination Rates according to School Type",
         align = c("l","r")) %>%
@@ -201,13 +201,13 @@ school_vs_overall <- measles_diff %>%
 
 school_vs_overall %>%
   # convert rates to a percentage
-  mutate(school_mmr_rate = percent(school_mmr_rate/100),
-         school_overall_rate = percent(school_overall_rate/100),
-         rate_diff = percent(rate_diff/100)) %>%
+  mutate(school_mmr_rate = round(school_mmr_rate,2),
+         school_overall_rate = round(school_overall_rate,2),
+         rate_diff = round(rate_diff,2)) %>%
   kable(col.names = c("School Type",
-                      "School MMR Vaccination Rate",
-                      "School Overall Vaccination Rate",
-                      "Rate Differences"),
+                      "School MMR Vaccination Rate (%)",
+                      "School Overall Vaccination Rate (%)",
+                      "Rate Differences (%)"),
         # add a caption
         caption = "School's MMR Vaccination Rate and Overall Vaccination Rate Comparison") %>%
   kable_styling()
@@ -371,32 +371,65 @@ measles_income_state <- measles_density_income %>%
 
 measles_income_state %>%
   # convert mmr to a percentage
-  mutate(avg_mmr = percent(measles_income_state$avg_mmr/100),
+  mutate(avg_mmr = round(avg_mmr,2),
          avg_percapita_income = dollar(avg_percapita_income)) %>%
   arrange(desc(avg_mmr)) %>%
   head(5) %>%
   # add a caption
   kable(caption = "The Per Capita Income of the States with the Highest MMR Vaccination Rate",
-        col.names = c("States", "MMR Rate", "Per Capita Income")) %>%
+        col.names = c("States", "MMR Vaccination Rate (%)", "Per Capita Income")) %>%
   kable_styling()
 ```
 
 ```{r worst-mmr}
 measles_income_state %>%
   # convert mmr to a percentage
-  mutate(avg_mmr = percent(measles_income_state$avg_mmr/100),
+  mutate(avg_mmr = round(avg_mmr,2),
          avg_percapita_income = dollar(avg_percapita_income)) %>%
   arrange(avg_mmr) %>%
   head(5) %>%
   # add a caption
-  kable(caption = "The Per Capita Income of the States with the Highest MMR Vaccination Rate",
-        col.names = c("States", "MMR Rate", "Per Capita Income")) %>%
+  kable(caption = "The Per Capita Income of the States with the Lowest  MMR Vaccination Rate",
+        col.names = c("States", "MMR Vaccination Rate (%)", "Per Capita Income")) %>%
   kable_styling()
 ```
 
 The states with the highest MMR vaccination rate were; Illinois, Pennsylvania, Utah, Colorado and New York. These states each have an average per capita income of \$56,839,	\$56,225, \$46,320, \$58,456 and \$68,668, respectively, as shown in the plot below.
 
+## Does Low Enrollment  MMR Vaccination Rate
 
+```{r enrollment}
+measles_enroll <- measles %>% 
+  filter(mmr != -1,
+         enroll != "NA") %>%
+  group_by(county, state) %>% 
+  summarise(mmr = mean(mmr),
+            enroll = mean(enroll)) %>% 
+  filter(state != "Arkansas",
+         state != "Pennsylvania")
+
+measles_enroll %>% 
+  mutate(mmr = round(mmr,2),
+         enroll = round(enroll)) %>% 
+  arrange(mmr) %>% 
+  head(5) %>% 
+  kable(col.names = c("County", 
+                      "State", 
+                      "MMR Vaccination Rates (%)", 
+                      "Enrollment")) %>% 
+  kable_styling()
+```
+
+```{r enrollment-plot}
+measles_enroll %>% 
+  ggplot(aes(x = enroll,
+             y = mmr)) +
+  geom_point(aes(color = state)) +
+  geom_smooth(method = lm, se = FALSE) +
+  guides(color = FALSE) +
+  facet_wrap(~state, scales = "free") +
+  theme_bw()
+```
 
 # Conclusion
 
