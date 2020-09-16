@@ -104,7 +104,7 @@ The individual state dataset was scraped from the Tidy Tuesday Github repository
 
 # Analysis and findings
 
-```{r ida}
+```{r ida,eval=FALSE}
 g <- ggplot(measles_type, aes(mmr))
 
 g1 <- g + geom_histogram(binwidth = 1) + 
@@ -141,8 +141,7 @@ ggplot(measles_type, aes(x = mmr,
 The measles data was filtered to remove missing school type, overall vaccination rate and MMR rate. It was grouped by type of school and the average MMR vaccination rate and overall vaccination rate was calculated using the _mean_ function. The tibble generated was named _school_type_average_. Then, the average MMR rates from the  _school_type_average_ tibble were plotted. The rates were annotated accordingly, to draw attention to the difference between the MMR vaccination rate for each school type. 
 
 ```{r school-type-average}
-school_type_average <- 
-  measles_type %>%
+school_type_average <- measles_type %>%
   # group by type of school
   group_by(type) %>%
   # calculate the average mmr rate l
@@ -226,23 +225,6 @@ measles_diff %>%
   scale_y_continuous() +
   ylim(0,20) +
   theme_bw()
-
-measles_diff %>% 
-  ggplot(aes(x = type,
-             y = rdiff)) +
-  geom_violin(fill = "darkcyan", 
-              alpha = 0.2) +
-  scale_y_continuous() +
-  ylim(0,20) +
-  theme_bw()
-
-measles_diff %>% 
-  ggplot(aes(x = enroll,
-             y = rdiff)) +
-  geom_point() +
-  geom_smooth() +
-  xlim(0,400) +
-  theme_bw()
 ```
 
 The _school_type_average_ data was tabulated to compare the overall vaccination rate and MMR vaccination rate. Then, both rates were plotted according to school type. 
@@ -258,7 +240,8 @@ The measles data was grouped by state and then the average MMR and overall vacci
 ```{r density-summary}
 # Measles vaccination across all American states and school count
 measles_density_90 <- measles %>%
-  filter(mmr < 90) %>% 
+  filter(mmr < 90,
+         mmr != -1) %>% 
   group_by(state) %>%
   summarise(mmr = mean(mmr),
             overall = mean(overall),
@@ -328,11 +311,21 @@ mmr_p <- ggplot(usa_measles_states_mmr, aes(long,
 ggplotly(mmr_p)
 ```
 
+```{r mmr-chart}
+measles_density_90 %>% 
+  ggplot(aes(x = mmr,
+             y = state)) +
+  geom_col(fill = "darkcyan") + 
+  geom_vline(xintercept = mean(measles_density_90$mmr),
+             color = "red")
+  theme_bw()
+```
+
 The state with the highest MMR vaccination rate is Illinois at 97.39% and the state with the lowest MMR vaccination rate is Massachusetts at 57.68% as shown in the figure below. 
 
 The state with the highest overall vaccination rate is North Caroline at 96.779%, while the state with the lowest vaccination rate is Washington at 75.238% as shown in the figure above. It is difficult to compare the individual states MMR vaccination rate with the overall vaccination rate due to the missing data. However, California, Vermont, Ohio and Oregon have similar MMR and overall vaccination rates. 
 
-## What is the average income in the states with the highest and lowest vaccination rate?
+## Does Average Income Affect MMR Vaccination Rate?
 
 To analyse the average income of the states with the highest and lowest vaccination rate, an external dataset from [Tax Foundation:Github Repository](https://github.com/TaxFoundation/facts-and-figures) was retrieved. This data was merged with the measles data grouped by state, and the top and bottom five observations were tabulated for both the vaccination rates. The vaccination rate and income data were plotted using _geom_col_ and _gg_arrange_, and ordered in descending order. 
 
@@ -349,10 +342,10 @@ measles_density <- measles %>%
 measles_density_income <- measles_density %>% 
   left_join(state_income,
             by = "county_state") %>% 
-  rename(percapita_income = estimate)
+  rename(percapita_income = estimate) %>% 
+  filter(percapita_income != "NA")
 
 measles_density_income %>% 
-  filter(percapita_income != "NA") %>% 
   ggplot(aes(x = percapita_income,
              y = mmr)) +
   geom_point(data = select(measles_density_income, -state),
@@ -368,138 +361,42 @@ measles_density_income %>%
 
 
 ```{r best-mmr}
-measles_density_income %>%
+measles_income_state <- measles_density_income %>%
   select(state, 
          mmr, 
          percapita_income) %>%
+  group_by(state) %>% 
+  summarise(avg_mmr = mean(mmr),
+            avg_percapita_income = mean(percapita_income))
+
+measles_income_state %>%
   # convert mmr to a percentage
-  mutate(mmr = percent(measles_density_income$mmr/100)) %>%
-  # rename the column names
-  rename(State = state, 
-         MMR = mmr, 
-         PCI = percapita_income) %>%
-  arrange(desc(MMR)) %>%
-  mutate(PCI = dollar(PCI)) %>%
+  mutate(avg_mmr = percent(measles_income_state$avg_mmr/100),
+         avg_percapita_income = dollar(avg_percapita_income)) %>%
+  arrange(desc(avg_mmr)) %>%
   head(5) %>%
   # add a caption
-  kable(caption = "The PCI of the States with the Highest MMR Vaccination Rate") %>%
+  kable(caption = "The Per Capita Income of the States with the Highest MMR Vaccination Rate",
+        col.names = c("States", "MMR Rate", "Per Capita Income")) %>%
   kable_styling()
 ```
 
 ```{r worst-mmr}
-measles_density_mmr_income %>%
-  select(state, 
-         mmr, 
-         incomePerCapita) %>%
-  # convert mmr to percentage
-    mutate(mmr = percent(measles_density_mmr_income$mmr/100)) %>%
-  rename(State = state, 
-         MMR = mmr, 
-         PCI = incomePerCapita) %>%
-  arrange(MMR) %>%
-  mutate(PCI = dollar(PCI)) %>%
+measles_income_state %>%
+  # convert mmr to a percentage
+  mutate(avg_mmr = percent(measles_income_state$avg_mmr/100),
+         avg_percapita_income = dollar(avg_percapita_income)) %>%
+  arrange(avg_mmr) %>%
   head(5) %>%
   # add a caption
-  kable(caption = "The PCI of the States with the Lowest MMR Vaccination Rate") %>%
+  kable(caption = "The Per Capita Income of the States with the Highest MMR Vaccination Rate",
+        col.names = c("States", "MMR Rate", "Per Capita Income")) %>%
   kable_styling()
 ```
 
 The states with the highest MMR vaccination rate were; Illinois, Pennsylvania, Utah, Colorado and New York. These states each have an average per capita income of \$56,839,	\$56,225, \$46,320, \$58,456 and \$68,668, respectively, as shown in the plot below.
 
-```{r mmr-income-plot}
-p_mmr_income <- ggplot(measles_density_mmr_income, 
-                       aes(y = fct_reorder(state,
-                                           mmr))) +
-  geom_col(aes(x = incomePerCapita)) +
-  xlab("Income Per Capita") +
-  ylab("") +
-  theme(axis.ticks = element_blank(),
-        panel.background = element_blank(),
-        legend.position = "none") +
-  # add labels to the figure 
-  geom_label_repel(aes(x = incomePerCapita),
-                  label = dollar(measles_density_mmr_income$incomePerCapita),
-                  size= 2,
-                  show.legend = F) 
-```
 
-```{r arrange-mmr-income, fig.cap= "**The MMR Vaccination Rate and PCI of each State**"}
-ggarrange(p_mmr, 
-          p_mmr_income, 
-          nrow = 1) 
-```
-
-The states with the lowest MMR vaccination rate were Massachusetts, Connecticut, Arizona, Montana and Washington. Interestingly enough, Massachusetts and Connecticut report two of the highest average per capita incomes as seen in the figure above. 
-
-```{r merge-measles-overall-income}
-measles_density_overall_income <- measles_density_overall %>%
-  # merge the tables
-  merge(state_income[c("stateName", 
-                       "incomePerCapita")], 
-        by.x = "state", 
-        by.y = "stateName")
-```
-
-```{r best-overall}
-measles_density_overall_income %>%
-  select(state, 
-         overall, 
-         incomePerCapita) %>%
-  # convert overall vaccination rate to a percentage
-  mutate(overall = percent(measles_density_overall_income$overall/100)) %>%
-  rename(State = state, 
-         Overall = overall, 
-         PCI = incomePerCapita) %>%
-  arrange(desc(Overall)) %>%
-  mutate(PCI = dollar(PCI)) %>%
-  head(5) %>%
-  # add a caption
-  kable(caption = "The PCI of the States with the Highest Overall Vaccination Rate") %>%
-  kable_styling()
-```
-
-```{r worst-overall}
-measles_density_overall_income %>%
-  select(state, 
-         overall, 
-         incomePerCapita) %>%
-  # convert to a percentage
-  mutate(overall = percent(measles_density_overall_income$overall/100)) %>%
-  rename(State = state, 
-         Overall = overall, 
-         PCI = incomePerCapita) %>%
-  arrange(Overall) %>%
-  mutate(PCI = dollar(PCI)) %>%
-  head(5) %>%
-  # add a caption
-  kable(caption = "The PCI of the States with the Lowest Overall Vaccination Rate") %>%
-  kable_styling()
-```
-
-```{r overall-income-plot}
-p_overall_income <- ggplot(measles_density_overall_income, 
-                           aes(y = fct_reorder(state,
-                                               overall))) +
-  geom_col(aes(x = incomePerCapita)) +
-  xlab("Income Per Capita") +
-  ylab("") +
-  theme(axis.ticks = element_blank(),
-        panel.background = element_blank(),
-        legend.position = "none") +
-  # annotate the figure with the pci
-  geom_label_repel(aes(x = incomePerCapita),
-                  label = dollar(measles_density_overall_income$incomePerCapita),
-                  size= 2,
-                  show.legend = F) 
-```
-
-The states with the highest overall vaccination rate were North Carolina, Tennessee, Florida, Michigan and Oregon. They had an average per capita income that ranged from $46,117 to $50,843, which is quite low when compared to the other incomes in the plot. The states with the lowest overall vaccination rate were Washington, Oklahoma, Idaho, Iowa and Ohio. Idaho had the lowest per capita income, however, Washington had one of the highest per capita income's at $62,026, as seen in the figure below. 
-
-```{r arrange-overall-income, fig.cap="**The Overall Vaccination Rate and PCI of each State**"}
-ggarrange(p_overall, 
-          p_overall_income, 
-          nrow = 1)
-```
 
 # Conclusion
 
@@ -605,7 +502,7 @@ Yihui Xie (2020). knitr: A General-Purpose Package for
   
 # Discarded Codes
 
-```{r overall-map, include=FALSE}
+```{r overall-map, eval=FALSE}
 # Overall vaccination rate across states
 # add ggplotly to make the plot interactive
 overall_p <- ggplotly(ggplot(usa_measles_states_overall, 
@@ -627,7 +524,7 @@ overall_p <- ggplotly(ggplot(usa_measles_states_overall,
 overall_p
 ```
 
-```{r overall-state-plot, include=FALSE}
+```{r overall-state-plot, eval=FALSE}
 measles_density_overall <- measles_density %>%
   filter(overall > 0)
 
