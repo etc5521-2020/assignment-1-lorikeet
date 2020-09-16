@@ -5,8 +5,16 @@ library(tidyverse)
 #A key can be obtained: here http://api.census.gov/data/key_signup.html.
 census_api_key("YOUR API KEY GOES HERE")
 
+#Function for tidying census data
+census_tidy <- function(x){
+  x %>% separate(NAME, c("county", "state"), sep = ", ") %>%
+    select(-moe, -GEOID, -variable) %>%
+    mutate(county = gsub("* County", "", county),
+           county_state = str_c(county, ", ", state))
+}
+
 #Retrieving educational attainment data from US Census Bureau
-educational_attainment <- get_acs(geography = "state",
+educational_attainment <- get_acs(geography = "county",
                                   variables = c("B06009_005E", "B06009_003E", "B06009_002E", "B01003_001E"),
                                   year = 2018)
 
@@ -16,14 +24,15 @@ educational_attainment <- educational_attainment %>%
     variable == "B06009_005" ~ "Bachelor Degree",
     variable == "B06009_003" ~ "High School Graduates",
     variable == "B06009_002" ~ "Less than High School Graduates",
-    variable == "B01003_001" ~ "Total Population"
-  ))
+    variable == "B01003_001" ~ "Total Population"))
+
+educational_attainment <- census_tidy(educational_attainment)
 
 #Saving the educational attainment as csv file to github repo
 write.csv(educational_attainment, here::here("data/educational_attainment.csv"))
 
 #Retrieving 2018 migration data from US Census Bureau
-migration <- get_acs(geography = "state",
+migration <- get_acs(geography = "county",
                      variables = c("B06001_049", "B01003_001"),
                      year = 2018)
 
@@ -31,8 +40,9 @@ migration <- get_acs(geography = "state",
 migration <- migration %>%
   mutate(variable_description = case_when(
     variable == "B06001_049" ~ "Total Foreign Born",
-    variable == "B01003_001" ~ "Total Population"
-  ))
+    variable == "B01003_001" ~ "Total Population"))
+
+migration <- census_tidy(migration)
 
 #Saving the migration data frame as csv file to github repo
 write.csv(migration, here::here("data/migration.csv"))
@@ -46,10 +56,9 @@ state_income <- get_acs(geography = "county",
 state_income <- state_income %>%
   mutate(variable_description = case_when(
     variable == "B19301_001" ~ "Income Per Capita"
-  )) %>%
-  separate(NAME, c("county", "na", "state")) %>%
-  select(-na) %>%
-  mutate(county_state = str_c(county, ", ", state))
+  ))
+
+state_income <- census_tidy(state_income)
 
 #Saving the per capita income data frame as csv file to github repo
 write.csv(state_income, here::here("data/state_income.csv"))

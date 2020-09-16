@@ -41,6 +41,7 @@ library(ggridges)
 library(viridis)
 library(cowplot)
 library(colorspace)
+library(janitor)
 ```
 
 ```{r load-data}
@@ -331,7 +332,7 @@ To analyse the average income of the states with the highest and lowest vaccinat
 
 ```{r measles-density-income}
 # Measles vaccination across all American states and school count
-measles_density <- measles %>%
+measles_county <- measles %>%
   filter(county != "#N/A",
          mmr != -1) %>% 
   group_by(county_state) %>%
@@ -339,16 +340,25 @@ measles_density <- measles %>%
             overall = mean(overall),
             count = n())
 
-measles_density_income <- measles_density %>% 
+measles_county_income <- measles_county %>% 
   left_join(state_income,
             by = "county_state") %>% 
   rename(percapita_income = estimate) %>% 
   filter(percapita_income != "NA")
 
-measles_density_income %>% 
+#Adding a quantile column
+measles_county_income <- within(measles_county_income,
+                                quartile <- as.integer(cut(percapita_income,
+                                                           quantile(percapita_income,
+                                                                    probs = 0:4/4),
+                                                           include.lowest = TRUE)))
+
+measles_county_income$quartile <- as.factor(measles_county_income$quartile)
+
+measles_county_income %>% 
   ggplot(aes(x = percapita_income,
              y = mmr)) +
-  geom_point(data = select(measles_density_income, -state),
+  geom_point(data = select(measles_county_income, -state),
              color = "gray") + 
   geom_point(aes(color = state)) +
   geom_smooth(method = lm, se = FALSE) +
@@ -359,9 +369,8 @@ measles_density_income %>%
   theme_bw()
 ```
 
-
 ```{r best-mmr}
-measles_income_state <- measles_density_income %>%
+measles_state_income <- measles_county_income %>%
   select(state, 
          mmr, 
          percapita_income) %>%
@@ -369,8 +378,7 @@ measles_income_state <- measles_density_income %>%
   summarise(avg_mmr = mean(mmr),
             avg_percapita_income = mean(percapita_income))
 
-measles_income_state %>%
-  # convert mmr to a percentage
+measles_state_income %>%
   mutate(avg_mmr = round(avg_mmr,2),
          avg_percapita_income = dollar(avg_percapita_income)) %>%
   arrange(desc(avg_mmr)) %>%
@@ -382,7 +390,7 @@ measles_income_state %>%
 ```
 
 ```{r worst-mmr}
-measles_income_state %>%
+measles_state_income %>%
   # convert mmr to a percentage
   mutate(avg_mmr = round(avg_mmr,2),
          avg_percapita_income = dollar(avg_percapita_income)) %>%
@@ -430,6 +438,32 @@ measles_enroll %>%
   facet_wrap(~state, scales = "free") +
   theme_bw()
 ```
+
+## Migration
+
+```{r migration}
+migration$variable_description <- as.factor(migration$variable_description)
+
+migration_wide <- migration %>% 
+  pivot_wider(names_from = variable_description,
+              values_from = estimate) %>% 
+  clean_names() %>% 
+  mutate(foreign_prop = total_foreign_born/total_population)
+
+migration_wide %>% 
+  ggplot(aes(x = foreign_prop,
+             y = reorder(state, foreign_prop))) +
+  geom_boxplot() +
+  theme_bw()
+```
+
+```{r migration-measles}
+measles_county_migration <- measles_county %>% left_join(migration_wide,
+                             by = "county_state") %>% 
+  filter(foreign_prop != "NA")
+```
+
+## Education
 
 # Conclusion
 
