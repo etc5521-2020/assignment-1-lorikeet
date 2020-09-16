@@ -7,6 +7,7 @@ Team members:
 * Emily Sheehan
 * Aryan Jain
 * Jimmy Effendy
+* DIYAO CHEN
 
 # Steps
 

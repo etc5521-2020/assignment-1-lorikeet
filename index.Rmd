@@ -6,6 +6,7 @@ author:
   - Aryan Jain
   - Emily Sheehan
   - Jimmy Effendy
+  - DIYAO CHEN
 date: "`r Sys.Date()`"
 output: 
   bookdown::html_document2
