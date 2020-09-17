@@ -10,6 +10,7 @@ author:
 date: "`r Sys.Date()`"
 output: 
   bookdown::html_document2
+bibliography: reference.bib
 ---
 
 [This assignment is for ETC5521 Assignment 1 by Team `r rmarkdown::metadata$team` comprising of `r knitr::combine_words(rmarkdown::metadata$author)`.]{style="color:#006DAE;"}
@@ -115,7 +116,11 @@ A considerable amount of data wrangling needed to be done for the U.S. census da
 
 ```{r data-wrangling}
 measles <- measles %>% 
-  mutate(county_state = str_c(county, ", ", state))
+  mutate(county_state = str_c(county, ", ", state),
+         mmr_below_95 = case_when(
+           mmr < 95 ~ "Yes",
+           mmr >= 95 ~ "No"
+         ))
 
 measles_type <- measles %>%
   # remove missing data
@@ -127,7 +132,7 @@ measles_type <- measles %>%
 
 ## Are the MMR Vaccination Rates Higher in Private Schools?
 
-The measles data was filtered to remove missing school type, overall vaccination rate and MMR rate. It was grouped by type of school and the average MMR vaccination rate and overall vaccination rate was calculated using the _mean_ function. The tibble generated was named _school_type_average_. Then, the average MMR rates from the  _school_type_average_ tibble were plotted. The rates were annotated accordingly, to draw attention to the difference between the MMR vaccination rate for each school type. 
+In comparison to other school types, the tuition fee for private schools are generally higher than public school [@usnews19]. This partly due to the fact that public school receive funding from the government while private school are privately funded.
 
 ```{r school-type-average}
 school_type_average <- measles_type %>%
@@ -146,30 +151,51 @@ school_type_average %>%
         # add a caption
         caption = "Comparison of MMR Average Vaccination Rates according to School Type",
         align = c("l","r")) %>%
-  kable_styling()
+  kable_styling(full_width = FALSE)
 ```
 
-```{r school-type-plot, fig.cap="Box plot of School's MMR Vaccination Rates by School Types"}
-mmr_mean <- round(mean(measles_type$mmr))
+Table \@ref(tab:school-type-average) shows the 2018/2019 average MMR vaccination rates across different school types in USA. The table shows that Boards of Cooperative Education Services (BOCES) and public school have the highest rate of MMR vaccination rates compared to other school types. In contrast, private schools have the second lowest MMR vaccination rates.
+
+```{r school-type-plot, fig.cap="Box plot of School's MMR Vaccination Rates by School Types", fig.align="center"}
+mmr_avg <- round(median(measles_type$mmr))
 
 measles_type %>% 
   ggplot(aes(x = mmr,
-             y = reorder(as.factor(type), mmr))) +
+             y = reorder(as.factor(type), mmr, median))) +
   geom_boxplot(fill = "darkcyan",
                alpha = 0.2)+
-  labs(subtitle = "The mean of school's MMR vaccination rate is shown by the red line") +
+  labs(subtitle = "The median of school's MMR vaccination rate is shown by the red line") +
   xlab("MMR vaccination Rate") +
   ylab("Type of School") +
   ggtitle("The School's MMR Vaccination Rate") +
-  geom_vline(xintercept = mmr_mean, color = "red") +
+  geom_vline(xintercept = mmr_avg, color = "red") +
   scale_x_continuous(breaks = c(0, 25, 50, 75, 95, 100)) +
   theme_bw()
 ```
 
-The MMR vaccination rate was the highest in public schools, as seen in the table above. This is consistent with findings from a study conducted by Shaw (2014) where it was found that private schools have higher rates of exemptions for immunisations than public schools.
+Figure \@ref(fig:school-type-plot) reflects the distribution of the MMR vaccination rates across school types in a box plot, with type of school in the y-axis, and MMR vaccination rate in the x-axis. It is shown in the plot that most of the distribution of MMR vaccination rates across school types are skewed to the left. This means that school types, particularly public and private schools, have a considerable amount of outliers which values are small compared to the rest of the observations.
 
+While the value of the MMR vaccination rates of private school are not the most varied, it is more dispersed compared to public school and BOCES school. The average (median) for the vaccination rate for private school is also well below the average (median) of overall school's MMR vaccination rate in USA. Median (not mean) was chosen to estimate the average rate in this case as the dataset have a significant amount of outliers.
+
+This is consistent with findings from a study conducted by Shaw (2014) where it was found that private schools have higher rates of exemptions for immunisations than public schools.
 
 ## How Does School's MMR Vaccination Rate Compare to the School's Overall Vaccination Rate?
+
+```{r vac-diff-plot, fig.align="center", fig.cap="Box plot of Differences in School's MMR and Overall Vaccination Rates by School Types"}
+measles_diff %>% 
+  ggplot(aes(x = type,
+             y = rdiff)) +
+  geom_violin(fill = "darkcyan", 
+              alpha = 0.2) +
+  geom_boxplot(width = 0.02, 
+               fill = "darkorange", 
+               alpha = 0.5) +
+  scale_y_continuous() +
+  ylim(0,20) +
+  theme_bw()
+```
+
+The distribution of these differences in vaccination rates are reflected in a boxplot and violin plot in Figure \@ref(fig:vac-diff-plot). Similar with the previous section, these distributions have a fair amount of outliers. Kindergartens have the most dispersed distributions, while private schools have the least. The distribution of the difference in vaccination rates in public schools have multimodality characteristics.
 
 ```{r vacc-diff}
 measles_diff <-  measles %>%
@@ -202,44 +228,27 @@ school_vs_overall %>%
   kable_styling()
 ```
 
-```{r vac-diff-plot}
-measles_diff %>% 
-  ggplot(aes(x = type,
-             y = rdiff)) +
-  geom_violin(fill = "darkcyan", 
-              alpha = 0.2) +
-  geom_boxplot(width = 0.02, 
-               fill = "darkorange", 
-               alpha = 0.5) +
-  scale_y_continuous() +
-  ylim(0,20) +
-  theme_bw()
-```
-
-The _school_type_average_ data was tabulated to compare the overall vaccination rate and MMR vaccination rate. Then, both rates were plotted according to school type. 
-
-When comparing the vaccination rates according to school type, it is clear that the overall vaccination rate is lower than the MMR vaccination rate for all school types as seen in the plot below. Public schools have the highest overall vaccination rate and MMR rate. 
-
+In this section, the report will perform a comparative analysis between school's 2018/2019 MMR and overall vaccination rates in USA. The summary of this comparison are shown in Table \@ref(tab:vacc-diff). Compared to the previous section, the table only reflects three school types. This is due to the fact that only three types of school that have observations of vaccination rates for both MMR and overall vaccination rates in the WSJ dataset. Table \@ref(tab:vacc-diff) shows that kindergartens have 6.21% difference in MMR and overall vaccination rates. In contrast, private and public schools have similar MMR and overall vaccination rates.
 
 ## Which states have lowest vaccination rates?
 
-The measles data was grouped by state and then the average MMR and overall vaccination rate were calculated. Then, the _map_data_ function was used to create a tibble containing the geographical information of each state. This data was merged with the _measles_states_ data, which contains the average MMR and overall vaccination rate for each state. Any missing data or negative values were removed and the remaining data was plotted onto a map and bar chart using _geom_polygon_ and _geom_col_, respectively. The _ggplotly_ function was used to make the maps interactive. 
-
-
-```{r density-summary}
+```{r}
 # Measles vaccination across all American states and school count
-measles_density_90 <- measles %>%
-  filter(mmr < 90,
-         mmr != -1) %>% 
-  group_by(state) %>%
-  summarise(mmr = mean(mmr),
-            overall = mean(overall),
-            count = n())
+measles_density_95 <- measles %>% 
+  filter(mmr != -1) %>% 
+  group_by(state, mmr_below_95) %>%
+  tally() %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = mmr_below_95,
+              values_from = n) %>% 
+  rename(not_below_95 = No,
+         below_95 = Yes) %>% 
+  mutate(total = not_below_95 + below_95,
+         below_95_prop = below_95/total)
 
 # Measles vaccination across state
-measles_states_90 <- measles_density_90[c("state", 
-                                    "mmr", 
-                                    "overall")] %>%
+measles_states_95 <- measles_density_95[c("state", 
+                                    "below_95_prop")] %>%
   rename(region = state) %>%
   mutate(region = tolower(region))
 ```
@@ -250,7 +259,7 @@ usa <- map_data("state")
 
 # Merging usa map data with measles across state data
 usa_measles_states <- merge(usa, 
-                            measles_states_90, 
+                            measles_states_95, 
                             all.x = TRUE)
 
 # finding centroids and abb of each state
@@ -269,21 +278,17 @@ usa_measles_states <- merge(usa_measles_states,
   ungroup() %>%
   arrange(order)
 
-# filter the missing data out
-#usa_measles_states_overall <- usa_measles_states %>%
-  #filter(overall > 0)
-
 usa_measles_states_mmr <- usa_measles_states %>%
-  filter(mmr > 0)
+  filter(below_95_prop != "NA")
 ```
 
 ```{r mmr-map}
 # MMR vaccination rate across the states
 # add ggplotly to make the plot interactive
 mmr_p <- ggplot(usa_measles_states_mmr, aes(long, 
-                                            lat, 
-                                            group=group, 
-                                            fill=mmr)) +
+                                        lat, 
+                                        group=group, 
+                                        fill=below_95_prop)) +
   geom_polygon(color = "light grey") +
   geom_text(aes(X, Y, 
                 label = abb), 
@@ -291,24 +296,39 @@ mmr_p <- ggplot(usa_measles_states_mmr, aes(long,
             color = "white",
             family = "sans") +
   scale_fill_viridis() +
+  guides(fill = guide_legend(title = "Proportion")) +
     # add title and x and y axis and remove the legend
-  ggtitle("The Number of Schools with MMR Vaccination Rate Below 90% across States") +
+  ggtitle("The Proportion of Schools with MMR Vaccination Rate Below 95%") +
+  labs(subtitle = "The Lower the Proportion the Better") +
   xlab("Latitude") +
   ylab("Longitude") +
   theme_bw()
   #theme(legend.position = "none"))
-ggplotly(mmr_p)
+ggplotly(mmr_p)  %>%
+  layout(title = list(text = paste0('The Proportion of Schools with MMR Vaccination Rate Below 95%',
+                                    '<br>',
+                                    '<sup>',
+                                    'The Lower the Proportion the Better',
+                                    '</sup>')))
 ```
 
-```{r mmr-chart}
-measles_density_90 %>% 
-  ggplot(aes(x = mmr,
-             y = reorder(state, mmr))) +
+Vaccination rates across the state will be examined in this section. In particular, this section will explore the proportion of schools with MMR vaccination rates less than 95% across states in USA. According to California Department of Public Health, at least 95% of MMR vaccination rates needed to be achieved to prevent community disease transmission [@edsource19].
+
+The measles data was grouped by state and then the proportion of schools with less than 95% MMR vaccination rate were calculated. Then, the _map_data_ function was used to create a tibble containing the geographical information of each state. This data was merged with the _measles_states_ data, which contains the proportion for each state. Any missing data or negative values were removed and the remaining data was plotted onto a map and bar chart using _geom_polygon_ and _geom_col_, respectively. The _ggplotly_ function was used to make the maps interactive. 
+
+As reflected in Figure \@ref(fig:mmr-map), California and most of the Northeast region of the U.S. have a relatively low proportion of schools that have less than 95% MMR vaccination rate. It can be argued that there is no strong association between low MMR vaccination rates with geography. The proportion of schools with low vaccination rates appears to be varied randomly across the region.
+
+```{r mmr-chart, fig.align='center', fig.cap='Bar Chart of the Proportion of School with Less than 95% Vaccination Rates'}
+measles_density_95 %>% 
+  ggplot(aes(x = below_95_prop,
+             y = reorder(state, below_95_prop))) +
   geom_col(fill = "darkcyan") + 
-  geom_vline(xintercept = mean(measles_density_90$mmr),
+  geom_vline(xintercept = mean(measles_density_95$below_95_prop),
              color = "red")
   theme_bw()
 ```
+
+
 
 The state with the highest MMR vaccination rate is Illinois at 97.39% and the state with the lowest MMR vaccination rate is Massachusetts at 57.68% as shown in the figure below. 
 
