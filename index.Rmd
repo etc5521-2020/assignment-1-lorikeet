@@ -480,6 +480,8 @@ measles_education <- measles_county %>%
   left_join(educational_attainment,
             by = "county_state") %>% 
   filter(estimate != "NA")
+
+measles_education
 ```
 
 # Conclusion
