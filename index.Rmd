@@ -59,6 +59,61 @@ educational_attainment <- read_csv(here::here("data/educational_attainment.csv")
 migration <- read_csv(here::here("data/migration.csv"))
 ```
 
+
+# Introduction and Motivation
+
+Measles is a highly infectious disease caused by the Measles virus. It can lead to pneumonia, infections of the middle ear, swelling of the brain and death.
+
+A vaccine exists to prevent the onset of measles as there is no treatment. The vaccine involves the injection of attenuated measles antigens that stimulate the production of antibodies and memory cells, providing long-term protection against the virus. When administered properly, the vaccine is 90.5% effective within 72 hours of exposure (Barrabeig et al., 2011).
+
+Unfortunately there is a growing number of individuals refusing vaccination, particularly in the US (Phadke et al., 2016). In Texas, the number of unvaccinated children attaining exemptions to attend school has increased by 28 times since 2003 (Sinclair et al., 2019). This has led to several outbreaks of vaccine preventable diseases, such as Measles. If this trend continues, there could be calamitous consequences. 
+
+This paper hopes to determine whether there is a relationship between socioeconomic status and MMR vaccination rate. Specifically, it explores how MMR vaccination rates fluctuate across different school types, states, income levels, enrollment numbers, educational attainment level, and proportion of foregin born populations. It will also compare the MMR vaccination rates against the overall vaccination rates.
+
+Specifically, this paper hopes to answer the following questions:
+
+- **Primary Question**: 
+
+  + Does Measles vaccination rate improve with better socioeconomic conditions?
+
+- **Secondary Questions**:
+
+  + Are the MMR vaccination rates higher in private schools?
+  + How does school's MMR Vaccination rate compare to the school's overall vaccination rate?
+  + Which states have the highest vaccination rates?
+  + Are MMR Vaccination rates higher in higher income counties?
+  + What does number of enrollment tell us about MMR vaccination rates?
+  + Are MMR vaccination rates lower in areas with higher proportion of foreign-born population? 
+  + 
+
+First, the paper will discuss the data used and how it is prepared for the analysis. Then, analysis and findings about the research questions will be presented and discussed.
+
+# Data Description
+
+```{r find-missing-data, fig.cap="Missingness of the WSJ Measles Dataset", include=FALSE}
+# Analyse how many variables are missing
+naniar::vis_miss(measles, warn_large_data = FALSE)
+```
+
+To analyse the relationship a dataset was retrieved from Wall Street Journal (WSJ). The data comprises of vaccination rates for 46,412 schools in 32 U.S states and was retrieved from The Wall Street Journal. The variables include; the school academic year, the school's state, city, county, district, name, type, enrollment, MMR (measles, mumps and rubella) vaccination rate, overall vaccination rate, latitude, longitude and the percentage of students exempted from vaccinations due to personal, religious or medical reasons. The state health departments provided the vaccination data and the National Center for Education Statistic's provided the school location, which was matched against the school name. In the case that there was no match, the school's location was found with Google Maps API.
+
+Additional data from the U.S. Census Bureau is also retrieved for 2018 county level income per capita, educational attainment level, and the number of foreign-born population. This was done by utilizing Census data API provided by the Census Bureau as well as with tidycensus package.
+
+## Data Limitation
+
+One of the limitation of the WSJ measles data is that there is inconsistencies in data collection methods. The data was collected in the 2017-18 school year for 11 states, but for the remaining 21 states, it was collected in 2018-19 school year. Moreover, with the help of naniar package, it can be easily identified that this dataset has a considerable amount of missing values. Although every precaution has been taken to ensure accurate figures have been calculated, some of the MMR rates, overall vaccination rates and school types were missing from the original dataset. The following variables are largely unusable as due to its high number of missing values:
+
+- `xrel`: the percentage of students exempted from vaccinations due to personal reasons
+- `xmed`: the percentage of students exempted from vaccinations due to medical reasons
+- `xper`: the percentage of students exempted from vaccinations due to religious reasons
+- `district`: school district
+
+## Data Cleaning and Transformation
+
+The individual state dataset was scraped from the Tidy Tuesday Github repository and combined with the existing measles dataset with *left_join* to extract the longitude and latitude variables from it. Various functions from the *rvest* package were used to scrape the data including *read_html* and *html_table*.
+
+A considerable amount of data wrangling needed to be done for the U.S. census dataset as they do not provide descriptions of what each variable represents (e.g. variable B19301_001 represents Income Per Capita). In addition variable `county_state`, comprising of county and state, needed to be added for the measle and U.S. census dataset. This variable is used as a key to merge the measles and U.S. census dataset. This is achieved by utilizing `tidyverse` and `janitor` packages.
+
 ```{r data-wrangling}
 measles <- measles %>% 
   mutate(county_state = str_c(county, ", ", state))
@@ -69,74 +124,7 @@ measles_type <- measles %>%
          mmr != -1)
 ```
 
-
-# Introduction and motivation
-
-Measles is a highly infectious disease caused by the Measles virus. It can lead to pneumonia, infections of the middle ear, swelling of the brain and death.
-
-A vaccine exists to prevent the onset of measles as there is no treatment. The vaccine involves the injection of attenuated measles antigens that stimulate the production of antibodies and memory cells, providing long-term protection against the virus. When administered properly, the vaccine is 90.5% effective within 72 hours of exposure (Barrabeig et al., 2011).
-
-Unfortunately there is a growing number of individuals refusing vaccination, particularly in the US (Phadke et al., 2016). In Texas, the number of unvaccinated children attaining exemptions to attend school has increased by 28 times since 2003 (Sinclair et al., 2019). This has led to several outbreaks of vaccine preventable diseases, such as Measles. If this trend continues, there could be calamitous consequences. 
-
-This paper hopes to determine whether there is a relationship between socioeconomic status and vaccination rate. Specifically, it explores whether MMR vaccination rates are higher in private schools, how the MMR vaccination rate compares to the overall vaccination rate and compares the average per capita income across the states with the highest and lowest vaccination rates. 
-
-To analyse the relationship a dataset was retrieved from Wall Street Journal. Although every precaution has been taken to ensure accurate figures have been calculated, some of the MMR rates, overall vaccination rates and school types were missing from the original dataset. The missing data was identified using _vis_miss_ in the _naniar_ package, and removed to reduce the impact on the figures calculated. 
-
-```{r find-missing-data, include=FALSE}
-# Analyse how many variables are missing
-naniar::vis_miss(measles, warn_large_data = FALSE)
-```
-
-# Data description
-
-The data comprises of vaccination rates for 46,412 schools in 32 U.S states and was retrieved from The Wall Street Journal. The variables include; the school academic year, the school's state, city, county, district, name, type, enrollment, MMR (measles, mumps and rubella) vaccination rate, overall vaccination rate, latitude, longitude and the percentage of students exempted from vaccinations due to personal, religious or medical reasons. 
-
-The data was collected in the 2017-18 school year for 11 states and 2018-19 school year for the remaining 21 states. The state health departments provided the vaccination data and the National Center for Education Statistic's provided the school location, which was matched against the school name. In the case that there was no match, the school's location was found with Google Maps API. 
-
-The individual state dataset was scraped from the Tidy Tuesday Github repository and combined with the existing measles dataset with *left_join* to extract the longitude and latitude variables from it. Various functions from the *rvest* package were used to scrape the data including *read_html* and *html_table*. 
-
-**Primary Question**: Does Measles vaccination rate improve with better socioeconomic conditions?
-
-**Secondary Questions**:
-
-- Does MMR Vaccination Rates Differ Across School Types?
-- How Does School's MMR Vaccination Rate Compare to the School's Overall Vaccination Rate?
-- Which states have the highest and lowest vaccination rates?
-- What is the average income in the states with the highest and lowest vaccination rate?
-
-# Analysis and findings
-
-```{r ida,eval=FALSE}
-g <- ggplot(measles_type, aes(mmr))
-
-g1 <- g + geom_histogram(binwidth = 1) + 
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank())
-
-g2 <- g + geom_boxplot()  + 
-  theme(axis.title = element_blank(),
-        axis.text = element_blank(),
-        axis.ticks = element_blank())
-
-g3 <- g + geom_density()
-
-g1 + g2 + g3 + plot_layout(ncol = 1) +
-  xlim(92,100)
-
-
-ggplot(measles_type, aes(x = mmr,
-                         y = ..density..)) +
-  geom_histogram(binwidth = 0.2) + 
-  geom_density() +
-  xlim(92,100)
-
-ggplot(measles_type, aes(x = mmr,
-                         y = ..density..,
-                         fill = type)) +
-  geom_density() +
-  xlim(92,100)
-```
+# Analysis and Findings
 
 ## Are the MMR Vaccination Rates Higher in Private Schools?
 
