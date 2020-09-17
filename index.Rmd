@@ -181,22 +181,6 @@ This is consistent with findings from a study conducted by Shaw (2014) where it 
 
 ## How Does School's MMR Vaccination Rate Compare to the School's Overall Vaccination Rate?
 
-```{r vac-diff-plot, fig.align="center", fig.cap="Box plot of Differences in School's MMR and Overall Vaccination Rates by School Types"}
-measles_diff %>% 
-  ggplot(aes(x = type,
-             y = rdiff)) +
-  geom_violin(fill = "darkcyan", 
-              alpha = 0.2) +
-  geom_boxplot(width = 0.02, 
-               fill = "darkorange", 
-               alpha = 0.5) +
-  scale_y_continuous() +
-  ylim(0,20) +
-  theme_bw()
-```
-
-The distribution of these differences in vaccination rates are reflected in a boxplot and violin plot in Figure \@ref(fig:vac-diff-plot). Similar with the previous section, these distributions have a fair amount of outliers. Kindergartens have the most dispersed distributions, while private schools have the least. The distribution of the difference in vaccination rates in public schools have multimodality characteristics.
-
 ```{r vacc-diff}
 measles_diff <-  measles %>%
   # remove missing data
@@ -229,6 +213,27 @@ school_vs_overall %>%
 ```
 
 In this section, the report will perform a comparative analysis between school's 2018/2019 MMR and overall vaccination rates in USA. The summary of this comparison are shown in Table \@ref(tab:vacc-diff). Compared to the previous section, the table only reflects three school types. This is due to the fact that only three types of school that have observations of vaccination rates for both MMR and overall vaccination rates in the WSJ dataset. Table \@ref(tab:vacc-diff) shows that kindergartens have 6.21% difference in MMR and overall vaccination rates. In contrast, private and public schools have similar MMR and overall vaccination rates.
+
+
+```{r vac-diff-plot, fig.align="center", fig.cap="Box plot of Differences in School's MMR and Overall Vaccination Rates by School Types"}
+measles_diff %>% 
+  ggplot(aes(x = type,
+             y = rdiff)) +
+  geom_violin(fill = "darkcyan", 
+              alpha = 0.2) +
+  geom_boxplot(width = 0.02, 
+               fill = "darkorange", 
+               alpha = 0.5) +
+  scale_y_continuous() +
+  ylim(0,20) +
+  theme_bw()
+```
+
+
+The distribution of these differences in vaccination rates are reflected in a boxplot and violin plot in Figure \@ref(fig:vac-diff-plot). Similar with the previous section, these distributions have a fair amount of outliers. Kindergartens have the most dispersed distributions, while private schools have the least. The distribution of the difference in vaccination rates in public schools have multimodality characteristics.
+
+
+
 
 ## Which states have lowest vaccination rates?
 
@@ -327,8 +332,6 @@ measles_density_95 %>%
              color = "red")
   theme_bw()
 ```
-
-
 
 The state with the highest MMR vaccination rate is Illinois at 97.39% and the state with the lowest MMR vaccination rate is Massachusetts at 57.68% as shown in the figure below. 
 
@@ -520,7 +523,8 @@ measles_education_wide <- measles_education %>%
   summarise(bachelor_prop = mean(bachelor_prop),highschool_prop = mean(highschool_prop),mmr=mean(mmr))%>%
   mutate(education_level = bachelor_prop + highschool_prop)%>%
   select(state,mmr,education_level)%>%
-  group_by(mmr)
+  arrange(-education_level)
+ 
 measles_education_wide
 ```
 
@@ -530,17 +534,24 @@ measles_education_wide%>%
    plot_ly(y = ~ state, 
           x = ~ mmr, 
           orientation = 'h',
-          text =  ~ mmr,
+          text =  ~ state,
           textposition = 'auto',
           type = "bar", 
           name = "mmr",
-          marker = list(color = "#1f77b4")) %>%
+          marker = list(size = 7,color = "#1f77b4")) %>%
   add_trace(x = ~ education_level,
             text =  ~ education_level,
             textposition = 'auto',
             name = "education",
-            marker = list(color = "forestgreen")) 
+            marker = list(size = 5,color = "forestgreen"))%>%
+  layout(title = "Cases Distribution by Region",
+         barmode = 'stack',
+         hovermode = "compare",
+         legend = list(x = 0.7, y = 0.5))
+
 ```
+
+
 # Conclusion
 
 The analysis has revealed that it is likely that there is no association with socioeconomic status and vaccination rates. Private schools, which are more expensive than public schools thus inferring greater socioeconomic status, have a lower average MMR and average overall vaccination rate than their public counterparts. The two states with the lowest MMR vaccination rate; Connecticut and Massachusetts, had the two highest average per capita incomes. Similarly, Washington had the lowest overall vaccination rate and one of the highest average per capita incomes. Therefore, it is unlikely that vaccination rate improves with socioeconomic status. 
