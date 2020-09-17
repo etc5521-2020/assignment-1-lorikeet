@@ -454,7 +454,7 @@ migration$county <- as.factor(migration$county)
 migration$county_state <- as.factor(migration$county_state)
 
 migration_wide <- migration %>% 
-  select(state:county_state) %>% 
+  select(-X1) %>% 
   pivot_wider(names_from = variable_description,
               values_from = estimate) %>% 
   clean_names() %>%
@@ -485,15 +485,16 @@ educational_attainment$county_state <- as.factor(educational_attainment$county_s
 measles_education <- measles_county %>% 
   left_join(educational_attainment,
             by = "county_state") %>% 
+  select(-X1) %>% 
   filter(estimate != "NA")
 
-measles_education%>%
-pivot_wider(names_from = variable_description,
+measles_education_wide <- measles_education %>% 
+  pivot_wider(names_from = variable_description,
               values_from = estimate) %>% 
   clean_names()%>%
-  mutate(education = bachelor_degree/total_population)
-
-
+  mutate(bachelor_prop = bachelor_degree/total_population,
+         highschool_prop = high_school_graduates/total_population,
+         less_highschool_prop = less_than_high_school_graduates/total_population)
 ```
 
 # Conclusion
