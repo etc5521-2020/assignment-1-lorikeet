@@ -232,9 +232,6 @@ measles_diff %>%
 
 The distribution of these differences in vaccination rates are reflected in a boxplot and violin plot in Figure \@ref(fig:vac-diff-plot). Similar with the previous section, these distributions have a fair amount of outliers. Kindergartens have the most dispersed distributions, while private schools have the least. The distribution of the difference in vaccination rates in public schools have multimodality characteristics.
 
-
-
-
 ## Which states have lowest vaccination rates?
 
 ```{r}
@@ -333,13 +330,14 @@ measles_density_95 %>%
   theme_bw()
 ```
 
-The state with the highest MMR vaccination rate is Illinois at 97.39% and the state with the lowest MMR vaccination rate is Massachusetts at 57.68% as shown in the figure below. 
+Figure \@ref(fig:mmr-chart) reflects the proportion of school with low vaccination rates in a bar chart.
+It shows that there are 11 states which proportion is lower then the average states' proportion.
+Arkansas, however, have a worryingly high proportion of schools with low vaccination rates at 99.65%.
+Arkansas only has 2 schools out of 567 that has MMR vaccination rates higher than 95%.
 
-The state with the highest overall vaccination rate is North Caroline at 96.779%, while the state with the lowest vaccination rate is Washington at 75.238% as shown in the figure above. It is difficult to compare the individual states MMR vaccination rate with the overall vaccination rate due to the missing data. However, California, Vermont, Ohio and Oregon have similar MMR and overall vaccination rates. 
+## Does higher income per capita lead to higher MMR vaccination rates?
 
-## Are MMR Vaccination Rates Lower in Lower Income Counties?
-
-To analyse the average income of the states with the highest and lowest vaccination rate, an external dataset from [Tax Foundation:Github Repository](https://github.com/TaxFoundation/facts-and-figures) was retrieved. This data was merged with the measles data grouped by state, and the top and bottom five observations were tabulated for both the vaccination rates. The vaccination rate and income data were plotted using _geom_col_ and _gg_arrange_, and ordered in descending order. 
+To analyse the average income of the states with the highest and lowest vaccination rate, an external dataset from U.S. Census Bureau was retrieved. This data was merged with the measles data grouped by state, and the top and bottom five observations were tabulated for both the vaccination rates. The vaccination rate and income data were plotted using _geom_col_ and _gg_arrange_, and ordered in descending order. 
 
 ```{r measles-density-income}
 # Measles vaccination across all American states and school count
@@ -363,21 +361,6 @@ measles_county_income <- within(measles_county_income,
                                                            quantile(percapita_income,
                                                                     probs = 0:4/4),
                                                            include.lowest = TRUE)))
-
-measles_county_income$quartile <- as.factor(measles_county_income$quartile)
-
-measles_county_income %>% 
-  ggplot(aes(x = percapita_income,
-             y = mmr)) +
-  geom_point(data = select(measles_county_income, -state),
-             color = "gray") + 
-  geom_point(aes(color = state)) +
-  geom_smooth(method = lm, se = FALSE) +
-  ylim(60,100) +
-  facet_wrap(~state) +
-  scale_color_discrete_qualitative() + 
-  guides(color = FALSE) +
-  theme_bw()
 ```
 
 ```{r best-mmr}
@@ -411,6 +394,23 @@ measles_state_income %>%
   kable(caption = "The Per Capita Income of the States with the Lowest  MMR Vaccination Rate",
         col.names = c("States", "MMR Vaccination Rate (%)", "Per Capita Income")) %>%
   kable_styling()
+```
+
+```{r income-plot}
+measles_county_income$quartile <- as.factor(measles_county_income$quartile)
+
+measles_county_income %>% 
+  ggplot(aes(x = percapita_income,
+             y = mmr)) +
+  geom_point(data = select(measles_county_income, -state),
+             color = "gray") + 
+  geom_point(aes(color = state)) +
+  geom_smooth(method = lm, se = FALSE) +
+  ylim(60,100) +
+  facet_wrap(~state) +
+  scale_color_discrete_qualitative() + 
+  guides(color = FALSE) +
+  theme_bw()
 ```
 
 The states with the highest MMR vaccination rate were; Illinois, Pennsylvania, Utah, Colorado and New York. These states each have an average per capita income of \$56,839,	\$56,225, \$46,320, \$58,456 and \$68,668, respectively, as shown in the plot below.
