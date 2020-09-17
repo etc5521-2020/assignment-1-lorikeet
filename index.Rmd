@@ -80,11 +80,10 @@ Specifically, this paper hopes to answer the following questions:
 
   + Are the MMR vaccination rates higher in private schools?
   + How does school's MMR Vaccination rate compare to the school's overall vaccination rate?
-  + Which states have the highest vaccination rates?
-  + Are MMR Vaccination rates higher in higher income counties?
-  + What does number of enrollment tell us about MMR vaccination rates?
+  + Which states have the lowest vaccination rates?
+  + Does higher income per capita lead to higher MMR vaccination rates?
   + Are MMR vaccination rates lower in areas with higher proportion of foreign-born population? 
-  + 
+  + Does regions with better educational attainments have higher MMR vaccination rates?
 
 First, the paper will discuss the data used and how it is prepared for the analysis. Then, analysis and findings about the research questions will be presented and discussed.
 
