@@ -138,7 +138,7 @@ ggplot(measles_type, aes(x = mmr,
   xlim(92,100)
 ```
 
-## Does MMR Vaccination Rates Differ Across School Types?
+## Are the MMR Vaccination Rates Higher in Private Schools?
 
 The measles data was filtered to remove missing school type, overall vaccination rate and MMR rate. It was grouped by type of school and the average MMR vaccination rate and overall vaccination rate was calculated using the _mean_ function. The tibble generated was named _school_type_average_. Then, the average MMR rates from the  _school_type_average_ tibble were plotted. The rates were annotated accordingly, to draw attention to the difference between the MMR vaccination rate for each school type. 
 
@@ -316,7 +316,7 @@ ggplotly(mmr_p)
 ```{r mmr-chart}
 measles_density_90 %>% 
   ggplot(aes(x = mmr,
-             y = state)) +
+             y = reorder(state, mmr))) +
   geom_col(fill = "darkcyan") + 
   geom_vline(xintercept = mean(measles_density_90$mmr),
              color = "red")
@@ -327,7 +327,7 @@ The state with the highest MMR vaccination rate is Illinois at 97.39% and the st
 
 The state with the highest overall vaccination rate is North Caroline at 96.779%, while the state with the lowest vaccination rate is Washington at 75.238% as shown in the figure above. It is difficult to compare the individual states MMR vaccination rate with the overall vaccination rate due to the missing data. However, California, Vermont, Ohio and Oregon have similar MMR and overall vaccination rates. 
 
-## Does Average Income Affect MMR Vaccination Rate?
+## Are MMR Vaccination Rates Lower in Lower Income Counties?
 
 To analyse the average income of the states with the highest and lowest vaccination rate, an external dataset from [Tax Foundation:Github Repository](https://github.com/TaxFoundation/facts-and-figures) was retrieved. This data was merged with the measles data grouped by state, and the top and bottom five observations were tabulated for both the vaccination rates. The vaccination rate and income data were plotted using _geom_col_ and _gg_arrange_, and ordered in descending order. 
 
@@ -405,9 +405,9 @@ measles_state_income %>%
 
 The states with the highest MMR vaccination rate were; Illinois, Pennsylvania, Utah, Colorado and New York. These states each have an average per capita income of \$56,839,	\$56,225, \$46,320, \$58,456 and \$68,668, respectively, as shown in the plot below.
 
-## Does Low Enrollment  MMR Vaccination Rate
+## What Does Enrollment Numbers Tell Us about MMR Vaccination Rates?
 
-```{r enrollment}
+```{r enrollment-data}
 measles_enroll <- measles %>% 
   filter(mmr != -1,
          enroll != "NA") %>%
@@ -416,6 +416,24 @@ measles_enroll <- measles %>%
             enroll = mean(enroll)) %>% 
   filter(state != "Arkansas",
          state != "Pennsylvania")
+```
+
+```{r enrollment-distribution}
+measles %>% 
+  ggplot(aes(x = enroll,
+             y = ..density..)) +
+  geom_histogram(binwidth = 5,
+                 fill = "darkcyan",
+                 alpha = 0.2) +
+  geom_density() +
+  geom_vline(xintercept = median(measles$enroll,
+                               na.rm = TRUE),
+             color = "red") +
+  xlim(0,1000) +
+  theme_bw() 
+```
+
+```{r enrollment-table}
 
 measles_enroll %>% 
   mutate(mmr = round(mmr,2),
@@ -440,20 +458,24 @@ measles_enroll %>%
   theme_bw()
 ```
 
-## Migration
+## Are MMR Vaccination Rates Lower in Areas with Higher Proportion of Foreign Born Population?
 
 ```{r migration}
 migration$variable_description <- as.factor(migration$variable_description)
+migration$state <- as.factor(migration$state)
+migration$county <- as.factor(migration$county)
+migration$county_state <- as.factor(migration$county_state)
 
 migration_wide <- migration %>% 
+  select(state:county_state) %>% 
   pivot_wider(names_from = variable_description,
               values_from = estimate) %>% 
-  clean_names() %>% 
+  clean_names() %>%
   mutate(foreign_prop = total_foreign_born/total_population)
 
 migration_wide %>% 
   ggplot(aes(x = foreign_prop,
-             y = reorder(state, foreign_prop))) +
+             y = reorder(state, foreign_prop, median))) +
   geom_boxplot() +
   theme_bw()
 ```
@@ -465,6 +487,13 @@ measles_county_migration <- measles_county %>% left_join(migration_wide,
 ```
 
 ## Education
+
+```{r education-data}
+measles_education <- measles_county %>% 
+  left_join(educational_attainment,
+            by = "county_state") %>% 
+  filter(estimate != "NA")
+```
 
 # Conclusion
 
@@ -567,54 +596,3 @@ Yihui Xie (2020). knitr: A General-Purpose Package for
   Roger D. Peng, editors, Implementing Reproducible
   Computational Research. Chapman and Hall/CRC. ISBN
   978-1466561595
-  
-# Discarded Codes
-
-```{r overall-map, eval=FALSE}
-# Overall vaccination rate across states
-# add ggplotly to make the plot interactive
-overall_p <- ggplotly(ggplot(usa_measles_states_overall, 
-                    aes(long, 
-                        lat, 
-                        group=group, 
-                        fill=overall)) +
-  geom_polygon(color="light grey")+
-  geom_text(aes(X, Y, label = abb), 
-            size = 4,
-            color="white",
-            family="sans") +
-    # add a title and x and y axis
-  ggtitle("Overall Vaccination Rate Across States") +
-  xlab("Latitude") +
-  ylab("Longitude") +
-    # remove the legend
-  theme(legend.position = "none"))
-overall_p
-```
-
-```{r overall-state-plot, eval=FALSE}
-measles_density_overall <- measles_density %>%
-  filter(overall > 0)
-
-p_overall <- ggplot(measles_density_overall, 
-                    aes(y = fct_reorder(state,
-                                        overall), 
-                        x = overall,
-                        # fill according to overall vaccination rate
-                        fill = overall)) +
-  geom_col() +
-  # add x and y axis labels
-  xlab("Overall Vaccination Rate") +
-  ylab("") +
-  #remove axis ticks, legend and panel background
-  theme(axis.ticks = element_blank(),
-        panel.background = element_blank(),
-        legend.position = "none") +
-  # label the plot with percentages
-  geom_label_repel(label = percent(measles_density_overall$overall/100),
-                  size= 2,
-                  color = "white",
-                  show.legend = F) 
-```
-
-
