@@ -493,6 +493,7 @@ migration_wide %>%
 ```
 
 ```{r migration-measles}
+#Joining measles data set with migration dataset
 measles_county_migration <- measles_county %>% left_join(migration_wide,
                              by = "county_state") %>% 
   filter(foreign_prop != "NA")
@@ -506,7 +507,7 @@ educational_attainment$state <- as.factor(educational_attainment$state)
 educational_attainment$county <- as.factor(educational_attainment$county)
 educational_attainment$county_state <- as.factor(educational_attainment$county_state)
 
-
+#joining measles dataset with education dataset
 measles_education <- measles_county %>% 
   left_join(educational_attainment,
             by = "county_state") %>% 
