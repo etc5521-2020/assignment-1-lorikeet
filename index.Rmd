@@ -337,7 +337,7 @@ Arkansas only has 2 schools out of 567 that has MMR vaccination rates higher tha
 
 ## Does higher income per capita lead to higher MMR vaccination rates?
 
-To analyse the average income of the states with the highest and lowest vaccination rate, an external dataset from U.S. Census Bureau was retrieved. This data was merged with the measles data grouped by state, and the top and bottom five observations were tabulated for both the vaccination rates. The vaccination rate and income data were plotted using _geom_col_ and _gg_arrange_, and ordered in descending order. 
+To analyse the average income of the states with the highest and lowest vaccination rate, an external dataset from U.S. Census Bureau was retrieved. This data was merged with the measles data grouped by state, and the top and bottom five observations were tabulated for both the vaccination rates.
 
 ```{r measles-density-income}
 # Measles vaccination across all American states and school count
@@ -362,6 +362,8 @@ measles_county_income <- within(measles_county_income,
                                                                     probs = 0:4/4),
                                                            include.lowest = TRUE)))
 ```
+
+Table \@ref(tab:measles-density-income) shows the top five states, with their respective income per capita, that have the highest rate of MMR vaccinations.
 
 ```{r best-mmr}
 measles_state_income <- measles_county_income %>%
