@@ -1,5 +1,5 @@
 ---
-title: "ETC5521 Assignment 1"
+title: "ETC5521 Assignment 2"
 subtitle: "Measles Vaccination"
 team: Lorikeet
 author:
