@@ -518,6 +518,9 @@ measles_education_wide
 ```
 
 
+The _educational_level_ which is combine with _high_school_graduates_ and _bachelor_degree_,which can represent the educational level of a state. As we can see from the **Figure\@ref(fig:mmrvseduplot)**, we can know that the top of MMR vaccination Rates is state Illinois,which is 97.62% MMR Vaccination Rate. And the top of educational_level is Maine,which is 38.18% people accept the education.but the highest level of education can not represent the highest MMR Vaccination Rates. Only 92.24% MMR Vaccination Rate in Maine(the Highest level education state.)On the other hand, the highest MMR Vaccination Rates state is Illinois,which has 33.81% people accept the high level education. It s only in the middle of the pack.
+
+
 ```{r,mmrvseduplot, fig.cap="mmr vs education",fig.align = "center"}
 measles_education_wide%>%
    plot_ly(y = ~ state, 
@@ -542,6 +545,9 @@ measles_education_wide%>%
 ```{r}
 GGally::ggpairs(measles_education_wide,columns = 2:3)
 ```
+
+Base on the analysis**Figure\@ref(fig:corrlationofmmreducation)**. We can see that the MMR Vaccination Rates and educational level has weak relationalship.
+
 
 # Conclusion
 
