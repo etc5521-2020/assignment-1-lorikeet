@@ -411,7 +411,7 @@ measles_state_income %>%
   kable_styling()
 ```
 
-Table \@ref(tab:best-mmr) shows the top five states, with their respective income per capita, that have the highest rate of MMR vaccinations. The schools with the highest MMR vaccination rates are based on states with various level of income per capita. It ranges from `r dollar(28105)` to `r dollar(41021)`. The table also highlights that on average, schools that have highest MMR vaccination rates are based on states with high and medium level of income per capita (quantile 2 and 4).
+Table \@ref(tab:best-mmr) shows the top five states, with their respective income per capita, that have the highest rate of MMR vaccinations. The schools with the highest MMR vaccination rates are based on states with various level of income per capita. It ranges from USD 28,105 to USD 41,021. The table also highlights that on average, schools that have highest MMR vaccination rates are based on states with high and medium level of income per capita (quantile 2 and 4).
 
 Table \@ref(tab:worst-mmr), on the other hand, shows the top five states that have the lowest rates of MMR vaccination. Similar to the previous table, these schools are based states with varying level of income per capita. The states with the highest income quantile, however, do not have the lowest MMR vaccination rate.
 
@@ -457,32 +457,45 @@ migration$state <- as.factor(migration$state)
 migration$county <- as.factor(migration$county)
 migration$county_state <- as.factor(migration$county_state)
 
+state_income <- state_income %>% select(estimate:county_state) %>% 
+  pivot_wider(names_from = "variable_description",
+              values_from = "estimate")
+
 migration_wide <- migration %>% 
   select(-X1) %>% 
   pivot_wider(names_from = variable_description,
               values_from = estimate) %>% 
   clean_names() %>%
   mutate(foreign_prop = total_foreign_born/total_population)
-  
-migration_wide %>% group_by(state) %>% 
+
+migration_plot <- migration_wide %>% group_by(state) %>% 
   summarise(foreign_prop = mean(foreign_prop)) %>% 
-  ggplot(aes(x = state,
+  filter(foreign_prop != " NA") %>% 
+  ggplot(aes(x = reorder(state, foreign_prop),
              y = foreign_prop)) +
-  geom_segment(aes(x = state,
-                   xend = state,
+  geom_segment(aes(x = reorder(state, foreign_prop),
+                   xend = reorder(state, foreign_prop),
                    y = 0,
                    yend = foreign_prop),
                color = "grey") +
   geom_point(color = "orange", size = 2) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  theme_bw()
+  theme_bw() +
+  coord_flip()
+
+ggplotly(migration_plot)
 ```
+
+This section attempts to analyse whether MMR vaccinations are lower in regions where the proportion of foreign-born populations is high. The proportion of foreign-born population compared to total populations by each state are reflected in Figure \@ref(fig:income-plot). The figure suggests that state which population has the highest foreign-born proportion is New Jersey with 0.17. In contrast, West Virginia has the lowest proportion with only 0.01 of its total population are foreign-born.
 
 ```{r migration-measles}
 #Joining measles data set with migration dataset
 measles_county_migration <- measles_county %>% left_join(migration_wide,
                              by = "county_state") %>% 
   filter(foreign_prop != "NA")
+```
+
+```{r label, options}
+
 ```
 
 ## Education
