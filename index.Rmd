@@ -56,10 +56,9 @@ library(ggridges)
 
 ```{r load-data}
 # Read in data from github
-#measles <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-25/measles.csv')
+measles <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-25/measles.csv')
 
 #Read in data from repo
-measles <- read_csv(here::here("data/measles.csv"))
 state_income <- read_csv(here::here("data/state_income.csv"))
 educational_attainment <- read_csv(here::here("data/educational_attainment.csv"))
 migration <- read_csv(here::here("data/migration.csv"))
@@ -94,11 +93,6 @@ Specifically, this paper hopes to answer the following questions:
 First, the paper will discuss the data used and how it is prepared for the analysis. Then, analysis and findings about the research questions will be presented and discussed.
 
 # Data Description
-
-```{r find-missing-data, fig.cap="Missingness of the WSJ Measles Dataset", include=FALSE}
-# Analyse how many variables are missing
-naniar::vis_miss(measles, warn_large_data = FALSE)
-```
 
 To analyse the relationship a dataset was retrieved from Wall Street Journal (WSJ). The data comprises of vaccination rates for 46,412 schools in 32 U.S states and was retrieved from The Wall Street Journal. The variables include; the school academic year, the school's state, city, county, district, name, type, enrollment, MMR (measles, mumps and rubella) vaccination rate, overall vaccination rate, latitude, longitude and the percentage of students exempted from vaccinations due to personal, religious or medical reasons. The state health departments provided the vaccination data and the National Center for Education Statistic's provided the school location, which was matched against the school name. In the case that there was no match, the school's location was found with Google Maps API.
 
