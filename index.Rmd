@@ -120,7 +120,7 @@ One of the limitation of the WSJ measles data is that there is inconsistencies i
 
 The individual state dataset was scraped from the Tidy Tuesday Github repository and combined with the existing measles dataset with *left_join* to extract the longitude and latitude variables from it. Various functions from the *rvest* package were used to scrape the data including *read_html* and *html_table*.
 
-A considerable amount of data wrangling needed to be done for the U.S. census dataset as they do not provide descriptions of what each variable represents (e.g. variable B19301_001 represents Income Per Capita). In addition variable `county_state`, comprising of county and state, needed to be added for the measle and U.S. census dataset. This variable is used as a key to merge the measles and U.S. census dataset. This is achieved by utilizing `tidyverse` and `janitor` packages.
+A considerable amount of data wrangling needed to be done for the U.S. census dataset as they do not provide descriptions of what each variable represents (e.g. variable B19301_001 represents Income Per Capita). In addition, variable `county_state`, comprising of county and state, needed to be added for the measle and U.S. census dataset. This variable is used as a key to merge the measles and U.S. census dataset. This is achieved by utilizing `tidyverse` and `janitor` packages.
 
 ```{r data-wrangling}
 measles <- measles %>% 
@@ -256,6 +256,25 @@ measles_states_95 <- measles_density_95[c("state",
   mutate(region = tolower(region))
 ```
 
+```{r mmr-chart, fig.align='center', fig.cap='Bar Chart of the Proportion of School with Less than 95% Vaccination Rates'}
+measles_density_95 %>% 
+  ggplot(aes(x = below_95_prop,
+             y = reorder(state, below_95_prop))) +
+  geom_col(fill = "darkcyan") + 
+  geom_vline(xintercept = mean(measles_density_95$below_95_prop),
+             color = "red")+
+  ylab("States") +
+  xlab("Proportion of Schools with MMR Vaccination Rates Less than 95%") +
+  ggtitle("The Distribution of Schools with MMR Vaccination Rates Less than 95%",
+          subtitle = "The mean of the proportion is reflected by the red line") +
+  theme_bw()
+```
+
+
+Schools with low vaccination rates across the state will be examined in this section. In particular, this section will explore the proportion of schools with MMR vaccination rates less than 95% across states in USA. According to California Department of Public Health, at least 95% of MMR vaccination rates needed to be achieved to prevent community disease transmission [@edsource19].
+
+Figure \@ref(fig:mmr-chart) reflects the proportion of school with low vaccination rates in a bar chart. It shows that there are 11 states which proportion is lower then the average states' proportion. Arkansas, however, have a worryingly high proportion of schools with low vaccination rates at 99.65%. Arkansas only has 2 schools out of 567 that has MMR vaccination rates higher than 95%.
+
 ```{r map-data}
 # Use map_data() to create usa mapping dataframe
 usa <- map_data("state")
@@ -281,21 +300,21 @@ usa_measles_states <- merge(usa_measles_states,
   ungroup() %>%
   arrange(order)
 
-usa_measles_states_mmr <- usa_measles_states %>%
-  filter(below_95_prop != "NA")
+ usa_measles_states_mmr <- usa_measles_states
 ```
 
-```{r mmr-map}
+```{r mmr-map, fig.align="center", fig.cap="Map of School with MMR Vaccination Rates Less than 95%"}
 # MMR vaccination rate across the states
 # add ggplotly to make the plot interactive
 mmr_p <- ggplot(usa_measles_states_mmr, aes(long, 
                                         lat, 
                                         group=group, 
                                         fill=below_95_prop)) +
-  geom_polygon(color = "light grey") +
+  geom_polygon(color = "light grey",
+               size = 0.25) +
   geom_text(aes(X, Y, 
                 label = abb), 
-            size = 4,
+            size = 3,
             color = "white",
             family = "sans") +
   scale_fill_viridis() +
@@ -315,35 +334,11 @@ ggplotly(mmr_p)  %>%
                                     '</sup>')))
 ```
 
-Vaccination rates across the state will be examined in this section. In particular, this section will explore the proportion of schools with MMR vaccination rates less than 95% across states in USA. According to California Department of Public Health, at least 95% of MMR vaccination rates needed to be achieved to prevent community disease transmission [@edsource19].
-
 The measles data was grouped by state and then the proportion of schools with less than 95% MMR vaccination rate were calculated. Then, the _map_data_ function was used to create a tibble containing the geographical information of each state. This data was merged with the _measles_states_ data, which contains the proportion for each state. Any missing data or negative values were removed and the remaining data was plotted onto a map and bar chart using _geom_polygon_ and _geom_col_, respectively. The _ggplotly_ function was used to make the maps interactive. 
 
-As reflected in Figure \@ref(fig:mmr-map), California and most of the Northeast region of the U.S. have a relatively low proportion of schools that have less than 95% MMR vaccination rate. It can be argued that there is no strong association between low MMR vaccination rates with geography. The proportion of schools with low vaccination rates appears to be varied randomly across the region.
+The proportion of schools with less than 95% MMR vaccination rates are reflected in a map in Figure \@ref(fig:mmr-map). States that are not within the scope of the WSJ dataset are filled with grey. California and most of the Northeast region of the U.S. have a relatively low proportion of schools that have less than 95% MMR vaccination rate. It can be argued that there is no strong association between low MMR vaccination rates with geography. The proportion of schools with low vaccination rates appears to be scattered without pattern across the region.
 
-
-For approximately 20 years, NIS has monitored vaccination coverage levels among young children in the United States. The 2014 data indicate that coverage remains consistently high for most vaccinations, although variation by poverty status and geographic area was observed. For some vaccines and population subgroups, improvement in coverage is necessary to achieve optimal protection. For all vaccines, maintaining high coverage is critical to sustain progress in reducing the impact of vaccine-preventable diseases.@BibEntry2015Aug
-
-
-So,we can know that the Vaccination rate have no siginificant of geography, every state will
-ensure high level of the vaaccinataion rate to protect people`s health.
-
-```{r mmr-chart, fig.align='center', fig.cap='Bar Chart of the Proportion of School with Less than 95% Vaccination Rates'}
-measles_density_95 %>% 
-  ggplot(aes(x = below_95_prop,
-             y = reorder(state, below_95_prop))) +
-  geom_col(fill = "darkcyan") + 
-  geom_vline(xintercept = mean(measles_density_95$below_95_prop),
-             color = "red")+
-  theme_bw()
-```
-
-Figure \@ref(fig:mmr-chart) reflects the proportion of school with low vaccination rates in a bar chart.
-It shows that there are 11 states which proportion is lower then the average states' proportion.
-Arkansas, however, have a worryingly high proportion of schools with low vaccination rates at 99.65%.
-Arkansas only has 2 schools out of 567 that has MMR vaccination rates higher than 95%.
-
-## Does higher income per capita lead to higher MMR vaccination rates?
+## Does Higher Income Per Capita Lead to Higher MMR Vaccination Rates?
 
 To analyse the average income of the states with the highest and lowest vaccination rate, an external dataset from U.S. Census Bureau was retrieved. This data was merged with the measles data grouped by state, and the top and bottom five observations were tabulated for both the vaccination rates.
 
@@ -498,30 +493,16 @@ measles_county_migration %>%
   geom_smooth(method = "lm",
               se = FALSE) +
   theme_bw()
-
-# measles_county_migration %>% filter(foreign_prop > 0.05) %>% 
-#   ggplot(aes(x = state,
-#                                         y = mmr)) + 
-#   geom_boxplot(outlier.shape = NA) +
-#   geom_point(aes(color = total_foreign_born,
-#                  alpha = 0.3)) +
-#   scale_color_viridis() +
-#   ylim(60,100)
 ```
 
 To determine whether there are associations between MMR vaccination rates and the proportion of foreign born populations, a scatterplot is utilised. This is reflected in Figure \@ref(fig:migration-measles) where MMR vaccination rates are plotted in the y-axis, and the proportions are plotted in the x-axis; both variables are summarised at county level. The figure suggests that there is no strong associations between the two variables. The regression line in the plot, nevertheless, indicates that there might be a positive linear relationship between the variables. This means that the MMR vaccination rates may increase as the proportion of foreign born population increases in the county. 
 
-<<<<<<< HEAD
 But we found is not aligned with the general research on the net.base on the research(Adult vaccination disparities among foreign born populations in the United States, 2012).The report say that Vaccination coverage was lower among foreign born adults than those born in the U.S. Vaccination coverage varied by immigration status, citizenship, language, and demographic characteristics. As the number of foreign born persons residing in the United States increases, it is important to consider foreign birth and immigration status when assessing vaccination disparities and planning interventions.@Lu2014Dec
 
 So,we need to put for focus on the foreign born people's health and vaccination.
 
-
-
-## The relationship between MMR vaccination and education level.
-=======
 ## Does Regions with Better Educational Attainments Have higher MMR vaccination rates?
->>>>>>> jeffendy
+
 
 ```{r education-data}
 educational_attainment$variable_description <- as.factor(educational_attainment$variable_description)
@@ -552,10 +533,6 @@ measles_education_wide <- measles_education %>%
  
 ```
 
-<<<<<<< HEAD
-
-=======
->>>>>>> jeffendy
 ```{r,mmrvseduplot, fig.cap="mmr vs education",fig.align = "center"}
 measles_education_wide%>%
    plot_ly(y = ~ state, 
@@ -579,14 +556,9 @@ measles_education_wide%>%
 ```
 
 The _educational_level_ which is combine with _high_school_graduates_ and _bachelor_degree_,which can represent the educational level of a state. As we can see from the **Figure\@ref(fig:mmrvseduplot)**, we can know that the top of MMR vaccination Rates is state Illinois,which is 97.62% MMR Vaccination Rate. And the top of educational_level is Maine,which is 38.18% people accept the education.but the highest level of education can not represent the highest MMR Vaccination Rates. Only 92.24% MMR Vaccination Rate in Maine(the Highest level education state.)On the other hand, the highest MMR Vaccination Rates state is Illinois,which has 33.81% people accept the high level education. It s only in the middle of the pack.
-<<<<<<< HEAD
+
 
 ```{r,corrlationofmmreducation, fig.cap="mmreducorrlation",fig.align = "center"}
-=======
-
-
-```{r corrlationofmmreducation}
->>>>>>> jeffendy
 GGally::ggpairs(measles_education_wide,columns = 2:3)
 ```
 
