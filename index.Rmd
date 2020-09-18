@@ -75,9 +75,9 @@ Measles is a highly infectious disease caused by the Measles virus. It can lead 
 
 A vaccine exists to prevent the onset of measles as there is no treatment. The vaccine involves the injection of attenuated measles antigens that stimulate the production of antibodies and memory cells, providing long-term protection against the virus. When administered properly, the vaccine is 90.5% effective within 72 hours of exposure (Barrabeig et al., 2011).
 
-Unfortunately there is a growing number of individuals refusing vaccination, particularly in the US (Phadke et al., 2016). In Texas, the number of unvaccinated children attaining exemptions to attend school has increased by 28 times since 2003 (Sinclair et al., 2019). This has led to several outbreaks of vaccine preventable diseases, such as Measles. If this trend continues, there could be calamitous consequences. 
+Unfortunately there is a growing number of individuals refusing vaccination, particularly in the US (Phadke et al., 2016). In Texas, the number of unvaccinated children attaining exemptions to attend school has increased by 28 times since 2003 (Sinclair et al., 2019). This has led to several outbreaks of vaccine preventable diseases, such as Measles. If this trend continues, there could be calamitous consequences.
 
-This paper hopes to determine whether there is a relationship between socioeconomic status and MMR vaccination rate. Specifically, it explores how MMR vaccination rates fluctuate across different school types, states, income levels, enrollment numbers, educational attainment level, and proportion of foregin born populations. It will also compare the MMR vaccination rates against the overall vaccination rates.
+Knowing the drivers behind the level of MMR vaccination rates is therefore imperative. This paper hopes to determine whether there is a relationship between socioeconomic status and MMR vaccination rate. Specifically, it explores how MMR vaccination rates fluctuate across different school types, states, income levels, enrollment numbers, educational attainment level, and proportion of foregin born populations. It will also compare the MMR vaccination rates against the overall vaccination rates.
 
 Specifically, this paper hopes to answer the following questions:
 
@@ -510,7 +510,7 @@ measles_county_migration %>%
   theme_bw()
 ```
 
-To determine whether there are associations between MMR vaccination rates and the proportion of foreign born populations, a scatterplot is utilised. This is reflected in Figure \@ref(fig:migration-measles) where MMR vaccination rates are plotted in the y-axis, and the proportions are plotted in the x-axis; both variables are summarised at county level. The figure suggests that there is no strong associations between the two variables. The regression line in the plot, nevertheless, indicates that there may be a weak positive linear relationship between the variables. This means that the MMR vaccination rates may increase as the proportion of foreign born population increases in the county. This, however, is not aligned with the general research that is publicly available. A study found that persons that were born outstide of the U.S. have a high risk of under-vaccinations.
+To determine whether there are associations between MMR vaccination rates and the proportion of foreign born populations, a scatterplot is utilised. This is reflected in Figure \@ref(fig:migration-measles) where MMR vaccination rates are plotted in the y-axis, and the proportions are plotted in the x-axis; both variables are summarised at county level. The figure suggests that there is no strong associations between the two variables. The regression line in the plot, nevertheless, indicates that there may be a weak positive linear relationship between the variables. This means that the MMR vaccination rates may increase as the proportion of foreign born population increases in the county. This, however, is not aligned with the general research that is publicly available. A study found that persons that were born outstide of the U.S. have a high risk of under-vaccinations [@Lu2014Dec].
 
 ## Does Regions with Better Educational Attainments Have higher MMR vaccination rates?
 
@@ -577,7 +577,13 @@ On the reserch of Mora(The influence of education on the access to childhood imm
 
 # Conclusion
 
-The analysis has revealed that it is likely that there is no association with socioeconomic status and vaccination rates. Private schools, which are more expensive than public schools thus inferring greater socioeconomic status, have a lower average MMR and average overall vaccination rate than their public counterparts. The two states with the lowest MMR vaccination rate; Connecticut and Massachusetts, had the two highest average per capita incomes. Similarly, Washington had the lowest overall vaccination rate and one of the highest average per capita incomes. Therefore, it is unlikely that vaccination rate improves with socioeconomic status. 
+The increasing number of individuals that refuses vaccination increases has been becoming a significant concerns for public health. Efforts to reveal drivers behind the trends is imperative to prevent outbreaks of preventable diseases. This report aims to examine whether measles vaccination rates increases as socioeconomic condition improves.
+
+The analysis has revealed that while the MMR vaccination rate is generally higher than the overall vaccination rates,it seems to be that MMR vaccination rates has no clear association with socioeconomic conditions. The average of vaccination rates in public school is higher compared to private schools even though private schools' tuition are generally higher. However, the difference between MMR and overall vaccination rates are similar in private and public school.
+
+The schools with low MMR vaccination rates vary without apparent pattern across the state, with Arkansas having abnormally high proportion of these schools. Moreover, there is no clear association between income and MMR vaccination rates at state level. At national level, however, there are clearer association between income and MMR vaccination rates. Contrary to popular belief, MMR vaccination rates are higher in lower income bracket, and lower in higher income bracket.
+
+In regard to migration level, what was found from our analysis is not aligned with the general study. While it is difficult to determine the association between proportion of foreign born population and MMR vaccination rates, the regression line suggest that there is a weak positive linear relationships. This is in contrary with the typical research that suggests that foreign born individuals have higher risks of under-vaccinations.
 
 # References
 
