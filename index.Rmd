@@ -8,8 +8,14 @@ author:
   - Jimmy Effendy
   - DIYAO CHEN
 date: "`r Sys.Date()`"
-output: 
-  bookdown::html_document2
+output:
+  bookdown::html_document2: 
+    citation_package: biblatex
+    number_sections: yes
+    theme: cerulean
+    toc: yes
+    toc_float:
+      collapsed: yes
 bibliography: reference.bib
 ---
 
@@ -18,7 +24,8 @@ bibliography: reference.bib
 ```{r, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, 
                       message = FALSE, 
-                      warning = FALSE)
+                      warning = FALSE,
+                      cache = TRUE)
 ```
 
 ```{r libraries}
@@ -326,7 +333,7 @@ measles_density_95 %>%
              y = reorder(state, below_95_prop))) +
   geom_col(fill = "darkcyan") + 
   geom_vline(xintercept = mean(measles_density_95$below_95_prop),
-             color = "red")
+             color = "red")+
   theme_bw()
 ```
 
@@ -482,7 +489,7 @@ measles_county_migration <- measles_county %>% left_join(migration_wide,
 
 ```{r education-data}
 educational_attainment$variable_description <- as.factor(educational_attainment$variable_description)
-educational_attainment$state <- as.factor(educational_attainment$state)
+educational_attainment$state <- as.character(educational_attainment$state)
 educational_attainment$county <- as.factor(educational_attainment$county)
 educational_attainment$county_state <- as.factor(educational_attainment$county_state)
 
@@ -502,21 +509,21 @@ measles_education_wide <- measles_education %>%
          less_highschool_prop = round(less_than_high_school_graduates/total_population*100,2))%>%
   select(state,bachelor_prop,highschool_prop,less_highschool_prop,mmr)%>%
   group_by(state)%>%
-  summarise(bachelor_prop = mean(bachelor_prop),highschool_prop = mean(highschool_prop),mmr=mean(mmr))%>%
+  summarise(bachelor_prop = round(mean(bachelor_prop),2),highschool_prop = round(mean(highschool_prop),2),mmr=round(mean(mmr),2))%>%
   mutate(education_level = bachelor_prop + highschool_prop)%>%
   select(state,mmr,education_level)%>%
-  arrange(-education_level)
+  arrange(-mmr,-education_level)
  
 measles_education_wide
 ```
 
 
-```{r}
+```{r,mmrvseduplot, fig.cap="mmr vs education",fig.align = "center"}
 measles_education_wide%>%
    plot_ly(y = ~ state, 
           x = ~ mmr, 
           orientation = 'h',
-          text =  ~ state,
+          text =  ~ mmr,
           textposition = 'auto',
           type = "bar", 
           name = "mmr",
@@ -526,13 +533,15 @@ measles_education_wide%>%
             textposition = 'auto',
             name = "education",
             marker = list(size = 5,color = "forestgreen"))%>%
-  layout(title = "Cases Distribution by Region",
+  layout(title = "MMR vs education",
          barmode = 'stack',
          hovermode = "compare",
-         legend = list(x = 0.7, y = 0.5))
+         legend = list(x = 1, y = 0.5))
 
 ```
-
+```{r}
+GGally::ggpairs(measles_education_wide,columns = 2:3)
+```
 
 # Conclusion
 
