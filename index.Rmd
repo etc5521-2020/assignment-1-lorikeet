@@ -327,6 +327,13 @@ The measles data was grouped by state and then the proportion of schools with le
 
 As reflected in Figure \@ref(fig:mmr-map), California and most of the Northeast region of the U.S. have a relatively low proportion of schools that have less than 95% MMR vaccination rate. It can be argued that there is no strong association between low MMR vaccination rates with geography. The proportion of schools with low vaccination rates appears to be varied randomly across the region.
 
+
+For approximately 20 years, NIS has monitored vaccination coverage levels among young children in the United States. The 2014 data indicate that coverage remains consistently high for most vaccinations, although variation by poverty status and geographic area was observed. For some vaccines and population subgroups, improvement in coverage is necessary to achieve optimal protection. For all vaccines, maintaining high coverage is critical to sustain progress in reducing the impact of vaccine-preventable diseases.@BibEntry2015Aug
+
+
+So,we can know that the Vaccination rate have no siginificant of geography, every state will
+ensure high level of the vaaccinataion rate to protect people`s health.
+
 ```{r mmr-chart, fig.align='center', fig.cap='Bar Chart of the Proportion of School with Less than 95% Vaccination Rates'}
 measles_density_95 %>% 
   ggplot(aes(x = below_95_prop,
@@ -523,7 +530,6 @@ measles_education_wide <- measles_education %>%
   select(state,mmr,education_level)%>%
   arrange(-mmr,-education_level)
  
-measles_education_wide
 ```
 
 
