@@ -234,7 +234,7 @@ The distribution of these differences in vaccination rates are reflected in a bo
 
 ## Which states have lowest vaccination rates?
 
-```{r}
+```{r measles-states}
 # Measles vaccination across all American states and school count
 measles_density_95 <- measles %>% 
   filter(mmr != -1) %>% 
@@ -363,8 +363,6 @@ measles_county_income <- within(measles_county_income,
                                                            include.lowest = TRUE)))
 ```
 
-Table \@ref(tab:measles-density-income) shows the top five states, with their respective income per capita, that have the highest rate of MMR vaccinations.
-
 ```{r best-mmr}
 measles_state_income <- measles_county_income %>%
   select(state, 
@@ -374,6 +372,13 @@ measles_state_income <- measles_county_income %>%
   summarise(avg_mmr = mean(mmr),
             avg_percapita_income = mean(percapita_income))
 
+#Adding a quantile column
+measles_state_income <- within(measles_state_income,
+                                quartile <- as.integer(cut(avg_percapita_income,
+                                                           quantile(avg_percapita_income,
+                                                                    probs = 0:4/4),
+                                                           include.lowest = TRUE)))
+
 measles_state_income %>%
   mutate(avg_mmr = round(avg_mmr,2),
          avg_percapita_income = dollar(avg_percapita_income)) %>%
@@ -381,24 +386,29 @@ measles_state_income %>%
   head(5) %>%
   # add a caption
   kable(caption = "The Per Capita Income of the States with the Highest MMR Vaccination Rate",
-        col.names = c("States", "MMR Vaccination Rate (%)", "Per Capita Income")) %>%
+        col.names = c("States", "MMR Vaccination Rate (%)", "Per Capita Income", "Income Quantiles"),
+        align = c("l", "r", "r", "r")) %>%
   kable_styling()
 ```
 
 ```{r worst-mmr}
 measles_state_income %>%
-  # convert mmr to a percentage
   mutate(avg_mmr = round(avg_mmr,2),
          avg_percapita_income = dollar(avg_percapita_income)) %>%
   arrange(avg_mmr) %>%
   head(5) %>%
   # add a caption
-  kable(caption = "The Per Capita Income of the States with the Lowest  MMR Vaccination Rate",
-        col.names = c("States", "MMR Vaccination Rate (%)", "Per Capita Income")) %>%
+  kable(caption = "The Per Capita Income of the States with the Lowest MMR Vaccination Rate",
+        col.names = c("States", "MMR Vaccination Rate (%)", "Per Capita Income", "Income Quantiles"),
+        align = c("l", "r", "r", "r")) %>%
   kable_styling()
 ```
 
-```{r income-plot}
+Table \@ref(tab:best-mmr) shows the top five states, with their respective income per capita, that have the highest rate of MMR vaccinations. The schools with the highest MMR vaccination rates are based on states with various level of income per capita. It ranges from `r dollar(28105)` to `r dollar(41021)`. The table also highlights that on average, schools that have highest MMR vaccination rates are based on states with high and medium level of income per capita (quantile 2 and 4).
+
+Table \@ref(tab:worst-mmr), on the other hand, shows the top five states that have the lowest rates of MMR vaccination. Similar to the previous table, these schools are based states with varying level of income per capita. The states with the highest income quantile, however, do not have the lowest MMR vaccination rate.
+
+```{r income-plot, fig.cap="Scatter plot of School's MMR Vaccination Rates by Income Per Capita", fig.align="center"}
 measles_county_income$quartile <- as.factor(measles_county_income$quartile)
 
 measles_county_income %>% 
@@ -415,60 +425,22 @@ measles_county_income %>%
   theme_bw()
 ```
 
-The states with the highest MMR vaccination rate were; Illinois, Pennsylvania, Utah, Colorado and New York. These states each have an average per capita income of \$56,839,	\$56,225, \$46,320, \$58,456 and \$68,668, respectively, as shown in the plot below.
-
-## What Does Enrollment Numbers Tell Us about MMR Vaccination Rates?
-
-```{r enrollment-data}
-measles_enroll <- measles %>% 
-  filter(mmr != -1,
-         enroll != "NA") %>%
-  group_by(county, state) %>% 
-  summarise(mmr = mean(mmr),
-            enroll = mean(enroll)) %>% 
-  filter(state != "Arkansas",
-         state != "Pennsylvania")
-```
-
-```{r enrollment-distribution}
-measles %>% 
-  ggplot(aes(x = enroll,
-             y = ..density..)) +
-  geom_histogram(binwidth = 5,
-                 fill = "darkcyan",
-                 alpha = 0.2) +
-  geom_density() +
-  geom_vline(xintercept = median(measles$enroll,
-                               na.rm = TRUE),
+```{r income-box, fig.cap="Box plot of School's MMR Vaccination Rates by Income Quantiles", fig.align="center"}
+measles_county_income %>% #group_by(quartile) %>% 
+  #summarise(mmr = mean(mmr)) %>% 
+  ggplot(aes(x = quartile,
+             y = mmr,
+             fill = quartile)) +
+  geom_boxplot() +
+  geom_hline(yintercept = median(measles_county_income$mmr),
              color = "red") +
-  xlim(0,1000) +
-  theme_bw() 
-```
-
-```{r enrollment-table}
-
-measles_enroll %>% 
-  mutate(mmr = round(mmr,2),
-         enroll = round(enroll)) %>% 
-  arrange(mmr) %>% 
-  head(5) %>% 
-  kable(col.names = c("County", 
-                      "State", 
-                      "MMR Vaccination Rates (%)", 
-                      "Enrollment")) %>% 
-  kable_styling()
-```
-
-```{r enrollment-plot}
-measles_enroll %>% 
-  ggplot(aes(x = enroll,
-             y = mmr)) +
-  geom_point(aes(color = state)) +
-  geom_smooth(method = lm, se = FALSE) +
-  guides(color = FALSE) +
-  facet_wrap(~state, scales = "free") +
   theme_bw()
 ```
+
+Figure \@ref(fig:income-plot) reflects that income per capita have varying effect to MMR vaccination rates across different states. While linear association can be easily determined in some of the states, the relationship of the two variables are difficult to ascertain in most of the states. 
+
+The distribution of MMR vaccination rates across the different income quantiles are plotted in Figure \@ref(fig:income-box). The highest MMR vaccination rates occur in schools that are based on the lowest income quantile. The figure suggests that the vaccination rates are lower for schools that are based on highest income quantile. However, with the exception of quantile 1, the difference in the average (median) of the rates are small across the different income quantile.
+
 
 ## Are MMR Vaccination Rates Lower in Areas with Higher Proportion of Foreign Born Population?
 
@@ -484,11 +456,18 @@ migration_wide <- migration %>%
               values_from = estimate) %>% 
   clean_names() %>%
   mutate(foreign_prop = total_foreign_born/total_population)
-
-migration_wide %>% 
-  ggplot(aes(x = foreign_prop,
-             y = reorder(state, foreign_prop, median))) +
-  geom_boxplot() +
+  
+migration_wide %>% group_by(state) %>% 
+  summarise(foreign_prop = mean(foreign_prop)) %>% 
+  ggplot(aes(x = state,
+             y = foreign_prop)) +
+  geom_segment(aes(x = state,
+                   xend = state,
+                   y = 0,
+                   yend = foreign_prop),
+               color = "grey") +
+  geom_point(color = "orange", size = 2) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
   theme_bw()
 ```
 
