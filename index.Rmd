@@ -204,9 +204,7 @@ measles_diff %>%
   theme_bw()
 ```
 
-The difference in schools' overall vaccination rates and MMR vaccination rates will be examined in this section.
-
-The distribution of these differences in vaccination rates are reflected in density plots in Figure \@ref(fig:vac-diff). Similar with the previous section, these distributions have a fair amount of outliers. Kindergartens have the most dispersed distributions, while private schools have the least. The distribution of the difference in vaccination rates in public schools have strong multimodality characteristics.
+In this section, the report will perform a comparative analysis between school's 2018/2019 MMR and overall vaccination rates in USA. The distribution of these differences in vaccination rates are reflected in density plots in Figure \@ref(fig:vac-diff). Similar with the previous section, these distributions have a fair amount of outliers. Kindergartens have the most dispersed distributions, while private schools have the least. The distribution of the difference in vaccination rates in public schools have strong multimodality characteristics.
 
 ```{r vacc-diff-table}
 school_vs_overall <- measles_diff %>%
@@ -231,7 +229,7 @@ school_vs_overall %>%
   kable_styling()
 ```
 
-In this section, the report will perform a comparative analysis between school's 2018/2019 MMR and overall vaccination rates in USA. The summary of this comparison are shown in Table \@ref(tab:vacc-diff-table). Compared to the previous section, the table only reflects three school types. This is due to the fact that only three types of school that have observations of vaccination rates for both MMR and overall vaccination rates in the WSJ dataset. Table \@ref(tab:vacc-diff-table) shows that kindergartens have 6.21% difference in MMR and overall vaccination rates. In contrast, private and public schools have similar MMR and overall vaccination rates.
+The summary of vaccination rates comparison are shown in Table \@ref(tab:vacc-diff-table). Compared to the previous section, the table only reflects three school types. This is due to the fact that only three types of school that have observations of vaccination rates for both MMR and overall vaccination rates in the WSJ dataset. Table \@ref(tab:vacc-diff-table) shows that kindergartens have 6.21% difference in MMR and overall vaccination rates. In contrast, private and public schools have similar MMR and overall vaccination rates.
 
 ## Which states have lowest vaccination rates?
 
@@ -501,14 +499,8 @@ But we found is not aligned with the general research on the net.base on the res
 
 So,we need to put for focus on the foreign born people's health and vaccination.
 
-<<<<<<< HEAD
-=======
 
-
-
->>>>>>> 531a688fa508b47980fd090944c2f94ff871e099
 ## Does Regions with Better Educational Attainments Have higher MMR vaccination rates?
-
 
 ```{r education-data}
 educational_attainment$variable_description <- as.factor(educational_attainment$variable_description)
@@ -539,10 +531,6 @@ measles_education_wide <- measles_education %>%
  
 ```
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 531a688fa508b47980fd090944c2f94ff871e099
 ```{r,mmrvseduplot, fig.cap="mmr vs education",fig.align = "center"}
 measles_education_wide%>%
    plot_ly(y = ~ state, 
@@ -566,17 +554,8 @@ measles_education_wide%>%
 ```
 
 The _educational_level_ which is combine with _high_school_graduates_ and _bachelor_degree_,which can represent the educational level of a state. As we can see from the **Figure\@ref(fig:mmrvseduplot)**, we can know that the top of MMR vaccination Rates is state Illinois,which is 97.62% MMR Vaccination Rate. And the top of educational_level is Maine,which is 38.18% people accept the education.but the highest level of education can not represent the highest MMR Vaccination Rates. Only 92.24% MMR Vaccination Rate in Maine(the Highest level education state.)On the other hand, the highest MMR Vaccination Rates state is Illinois,which has 33.81% people accept the high level education. It s only in the middle of the pack.
-<<<<<<< HEAD
-
 
 ```{r,corrlationofmmreducation, fig.cap="mmreducorrlation",fig.align = "center"}
-=======
-<<<<<<< HEAD
-
-```{r,corrlationofmmreducation, fig.cap="mmreducorrlation",fig.align = "center"}
-
-
->>>>>>> 531a688fa508b47980fd090944c2f94ff871e099
 GGally::ggpairs(measles_education_wide,columns = 2:3)
 ```
 
