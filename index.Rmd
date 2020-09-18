@@ -51,6 +51,7 @@ library(viridis)
 library(cowplot)
 library(colorspace)
 library(janitor)
+library(ggridges)
 ```
 
 ```{r load-data}
@@ -139,8 +140,25 @@ measles_type <- measles %>%
 
 ## Are the MMR Vaccination Rates Higher in Private Schools?
 
-In comparison to other school types, the tuition fee for private schools are generally higher than public school [@usnews19]. This partly due to the fact that public school receive funding from the government while private school are privately funded.
+```{r school-type-plot, fig.cap="Box plot of School's MMR Vaccination Rates by School Types", fig.align="center"}
+mmr_avg <- round(median(measles_type$mmr))
 
+measles_type %>% 
+  ggplot(aes(x = mmr,
+             y = type)) +
+  geom_density_ridges(fill = "darkcyan",
+                      alpha = 0.2) + 
+  xlim(60, NA) +
+  xlab("MMR vaccination Rate") +
+  ylab("Type of School") +
+  ggtitle("The Distribution of School's MMR Vaccination Rate",
+          subtitle = "The distributions are negatively skewed") +
+  theme_bw()
+```
+
+This section focuses on private schools' MMR vaccination rates compared to other type of schools. It can be argued that school types can be used as a dimension to represent socioeconomic characteristics. In comparison to other school types, the tuition fee for private schools are generally higher than public school [@usnews19]. This partly due to the fact that public school receive funding from the government while private school are privately funded.
+
+The distribution of the MMR vaccination rates across school types is reflected in ridgeline plot in Figure \@ref(fig:school-type-plot); with type of school in the y-axis, and MMR vaccination rate in the x-axis. As the plot shows, the distribution of MMR vaccination rates across school types are skewed to the left. This means that school types have a considerable amount of outliers which values are small compared to the rest of the observations. In addition, some of the school types, such as private, non-public, and charter schools, have multimodality characteristics.
 
 ```{r school-type-average}
 school_type_average <- measles_type %>%
@@ -162,34 +180,11 @@ school_type_average %>%
   kable_styling(full_width = FALSE)
 ```
 
-Table \@ref(tab:school-type-average) shows the 2018/2019 average MMR vaccination rates across different school types in USA. The table shows that Boards of Cooperative Education Services (BOCES) and public school have the highest rate of MMR vaccination rates compared to other school types. In contrast, private schools have the second lowest MMR vaccination rates.
-
-```{r school-type-plot, fig.cap="Box plot of School's MMR Vaccination Rates by School Types", fig.align="center"}
-mmr_avg <- round(median(measles_type$mmr))
-
-measles_type %>% 
-  ggplot(aes(x = mmr,
-             y = reorder(as.factor(type), mmr, median))) +
-  geom_boxplot(fill = "darkcyan",
-               alpha = 0.2)+
-  labs(subtitle = "The median of school's MMR vaccination rate is shown by the red line") +
-  xlab("MMR vaccination Rate") +
-  ylab("Type of School") +
-  ggtitle("The School's MMR Vaccination Rate") +
-  geom_vline(xintercept = mmr_avg, color = "red") +
-  scale_x_continuous(breaks = c(0, 25, 50, 75, 95, 100)) +
-  theme_bw()
-```
-
-Figure \@ref(fig:school-type-plot) reflects the distribution of the MMR vaccination rates across school types in a box plot, with type of school in the y-axis, and MMR vaccination rate in the x-axis. It is shown in the plot that most of the distribution of MMR vaccination rates across school types are skewed to the left. This means that school types, particularly public and private schools, have a considerable amount of outliers which values are small compared to the rest of the observations.
-
-While the value of the MMR vaccination rates of private school are not the most varied, it is more dispersed compared to public school and BOCES school. The average (median) for the vaccination rate for private school is also well below the average (median) of overall school's MMR vaccination rate in USA. Median (not mean) was chosen to estimate the average rate in this case as the dataset have a significant amount of outliers.
-
-This is consistent with findings from a study conducted by Shaw (2014) where it was found that private schools have higher rates of exemptions for immunisations than public schools.
+Table \@ref(tab:school-type-average) shows the 2018/2019 average MMR vaccination rates across different school types in USA. The table shows that Boards of Cooperative Education Services (BOCES) and public school have the highest rate of MMR vaccination rates compared to other school types. In contrast, private schools have the second lowest MMR vaccination rates. This is consistent with findings from a study conducted by Shaw (2014) where it was found that private schools have higher rates of exemptions for immunisations than public schools.
 
 ## How Does School's MMR Vaccination Rate Compare to the School's Overall Vaccination Rate?
 
-```{r vacc-diff}
+```{r vac-diff, fig.align="center", fig.cap="Density plot of Differences in School's MMR and Overall Vaccination Rates"}
 measles_diff <-  measles %>%
   # remove missing data
   filter(type != "NA",
@@ -197,6 +192,23 @@ measles_diff <-  measles %>%
          overall != -1) %>% 
   mutate(rdiff = mmr - overall)
 
+measles_diff %>% 
+  ggplot(aes(x = rdiff,
+             y = ..density..)) +
+  geom_density(fill = "darkcyan",
+               alpha = 0.2) +
+  xlim(NA,10) +
+  facet_wrap(~type, scales = "free_y", nrow = 3) +
+  ggtitle("The Distribution of School's MMR and Overall Vaccination Rate Difference",
+          subtitle = "The distributions are positively skewed") +
+  theme_bw()
+```
+
+The difference in schools' overall vaccination rates and MMR vaccination rates will be examined in this section.
+
+The distribution of these differences in vaccination rates are reflected in density plots in Figure \@ref(fig:vac-diff). Similar with the previous section, these distributions have a fair amount of outliers. Kindergartens have the most dispersed distributions, while private schools have the least. The distribution of the difference in vaccination rates in public schools have strong multimodality characteristics.
+
+```{r vacc-diff-table}
 school_vs_overall <- measles_diff %>%
   # group by type of school
   group_by(type) %>%
@@ -204,7 +216,6 @@ school_vs_overall <- measles_diff %>%
   summarise(school_mmr_rate = mean(mmr),
             school_overall_rate = mean(overall),
             rate_diff = mean(rdiff)) 
-
 
 school_vs_overall %>%
   # convert rates to a percentage
@@ -220,25 +231,7 @@ school_vs_overall %>%
   kable_styling()
 ```
 
-In this section, the report will perform a comparative analysis between school's 2018/2019 MMR and overall vaccination rates in USA. The summary of this comparison are shown in Table \@ref(tab:vacc-diff). Compared to the previous section, the table only reflects three school types. This is due to the fact that only three types of school that have observations of vaccination rates for both MMR and overall vaccination rates in the WSJ dataset. Table \@ref(tab:vacc-diff) shows that kindergartens have 6.21% difference in MMR and overall vaccination rates. In contrast, private and public schools have similar MMR and overall vaccination rates.
-
-
-```{r vac-diff-plot, fig.align="center", fig.cap="Box plot of Differences in School's MMR and Overall Vaccination Rates by School Types"}
-measles_diff %>% 
-  ggplot(aes(x = type,
-             y = rdiff)) +
-  geom_violin(fill = "darkcyan", 
-              alpha = 0.2) +
-  geom_boxplot(width = 0.02, 
-               fill = "darkorange", 
-               alpha = 0.5) +
-  scale_y_continuous() +
-  ylim(0,20) +
-  theme_bw()
-```
-
-
-The distribution of these differences in vaccination rates are reflected in a boxplot and violin plot in Figure \@ref(fig:vac-diff-plot). Similar with the previous section, these distributions have a fair amount of outliers. Kindergartens have the most dispersed distributions, while private schools have the least. The distribution of the difference in vaccination rates in public schools have multimodality characteristics.
+In this section, the report will perform a comparative analysis between school's 2018/2019 MMR and overall vaccination rates in USA. The summary of this comparison are shown in Table \@ref(tab:vacc-diff-table). Compared to the previous section, the table only reflects three school types. This is due to the fact that only three types of school that have observations of vaccination rates for both MMR and overall vaccination rates in the WSJ dataset. Table \@ref(tab:vacc-diff-table) shows that kindergartens have 6.21% difference in MMR and overall vaccination rates. In contrast, private and public schools have similar MMR and overall vaccination rates.
 
 ## Which states have lowest vaccination rates?
 
@@ -518,7 +511,7 @@ measles_county_migration %>%
 
 To determine whether there are associations between MMR vaccination rates and the proportion of foreign born populations, a scatterplot is utilised. This is reflected in Figure \@ref(fig:migration-measles) where MMR vaccination rates are plotted in the y-axis, and the proportions are plotted in the x-axis; both variables are summarised at county level. The figure suggests that there is no strong associations between the two variables. The regression line in the plot, nevertheless, indicates that there might be a positive linear relationship between the variables. This means that the MMR vaccination rates may increase as the proportion of foreign born population increases in the county. 
 
-## Education
+## Does Regions with Better Educational Attainments Have higher MMR vaccination rates?
 
 ```{r education-data}
 educational_attainment$variable_description <- as.factor(educational_attainment$variable_description)
@@ -549,10 +542,6 @@ measles_education_wide <- measles_education %>%
  
 ```
 
-
-The _educational_level_ which is combine with _high_school_graduates_ and _bachelor_degree_,which can represent the educational level of a state. As we can see from the **Figure\@ref(fig:mmrvseduplot)**, we can know that the top of MMR vaccination Rates is state Illinois,which is 97.62% MMR Vaccination Rate. And the top of educational_level is Maine,which is 38.18% people accept the education.but the highest level of education can not represent the highest MMR Vaccination Rates. Only 92.24% MMR Vaccination Rate in Maine(the Highest level education state.)On the other hand, the highest MMR Vaccination Rates state is Illinois,which has 33.81% people accept the high level education. It s only in the middle of the pack.
-
-
 ```{r,mmrvseduplot, fig.cap="mmr vs education",fig.align = "center"}
 measles_education_wide%>%
    plot_ly(y = ~ state, 
@@ -575,12 +564,14 @@ measles_education_wide%>%
 
 ```
 
+The _educational_level_ which is combine with _high_school_graduates_ and _bachelor_degree_,which can represent the educational level of a state. As we can see from the **Figure\@ref(fig:mmrvseduplot)**, we can know that the top of MMR vaccination Rates is state Illinois,which is 97.62% MMR Vaccination Rate. And the top of educational_level is Maine,which is 38.18% people accept the education.but the highest level of education can not represent the highest MMR Vaccination Rates. Only 92.24% MMR Vaccination Rate in Maine(the Highest level education state.)On the other hand, the highest MMR Vaccination Rates state is Illinois,which has 33.81% people accept the high level education. It s only in the middle of the pack.
 
-```{r}
+
+```{r corrlationofmmreducation}
 GGally::ggpairs(measles_education_wide,columns = 2:3)
 ```
 
-Base on the analysis**Figure\@ref(fig:corrlationofmmreducation)**. We can see that the MMR Vaccination Rates and educational level has weak relationalship. 0.283 is a weak postive relationship. So, we can know that, the MMR vaccination has no significant relationship with educational. On the other hand, it has a lot to do with people's consciousness.People with low levels of education are also to be vaccination. 
+Base on the analysis **Figure\@ref(fig:corrlationofmmreducation)**. We can see that the MMR Vaccination Rates and educational level has weak relationship. 0.283 is a weak postive relationship. So, we can know that, the MMR vaccination has no significant relationship with educational. On the other hand, it has a lot to do with people's consciousness.People with low levels of education are also to be vaccination. 
 
 The greater educational attainment level, the higher the probability of being vaccinated in this immunization programme. The presence of an age profile for vaccinations showed that less educated parents visit their GPs more frequently for immunizations when their children are below the age of six, but that pattern is completely the opposite after that age. Hence, for children aged between six and 16, more educated parents are more likely to ensure their children are immunized. Likewise, systematic vaccinations are more likely for those parents with a lower educational attainment level.@Mora2018
 
