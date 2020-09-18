@@ -141,6 +141,7 @@ measles_type <- measles %>%
 
 In comparison to other school types, the tuition fee for private schools are generally higher than public school [@usnews19]. This partly due to the fact that public school receive funding from the government while private school are privately funded.
 
+
 ```{r school-type-average}
 school_type_average <- measles_type %>%
   # group by type of school
@@ -348,6 +349,7 @@ To analyse the average income of the states with the highest and lowest vaccinat
 
 ```{r measles-density-income}
 # Measles vaccination across all American states and school count
+
 measles_county <- measles %>%
   filter(county != "#N/A",
          mmr != -1) %>% 
@@ -451,15 +453,11 @@ The distribution of MMR vaccination rates across the different income quantiles 
 
 ## Are MMR Vaccination Rates Lower in Areas with Higher Proportion of Foreign Born Population?
 
-```{r migration}
+```{r migration, fig.cap="Lolipop plot of Foreign Born Population Proportion by States", fig.align="center", fig.height=5}
 migration$variable_description <- as.factor(migration$variable_description)
 migration$state <- as.factor(migration$state)
 migration$county <- as.factor(migration$county)
 migration$county_state <- as.factor(migration$county_state)
-
-state_income <- state_income %>% select(estimate:county_state) %>% 
-  pivot_wider(names_from = "variable_description",
-              values_from = "estimate")
 
 migration_wide <- migration %>% 
   select(-X1) %>% 
@@ -482,17 +480,36 @@ migration_plot <- migration_wide %>% group_by(state) %>%
   theme_bw() +
   coord_flip()
 
-ggplotly(migration_plot)
+migration_plot
 ```
 
-This section attempts to analyse whether MMR vaccinations are lower in regions where the proportion of foreign-born populations is high. The proportion of foreign-born population compared to total populations by each state are reflected in Figure \@ref(fig:income-plot). The figure suggests that state which population has the highest foreign-born proportion is New Jersey with 0.17. In contrast, West Virginia has the lowest proportion with only 0.01 of its total population are foreign-born.
+This section attempts to analyse whether MMR vaccinations are lower in regions where the proportion of foreign-born populations is high. The proportion of foreign-born population compared to total populations by each state are reflected in Figure \@ref(fig:migration). The figure suggests that state which population has the highest foreign-born proportion is New Jersey with 0.17. In contrast, West Virginia has the lowest proportion with only 0.01 of its total population are foreign-born.
 
-```{r migration-measles}
+```{r migration-measles, fig.cap="Scatter plot of Foreign Born Population Proportion by Vaccination Rates", fig.align="center", fig.height=5}
 #Joining measles data set with migration dataset
 measles_county_migration <- measles_county %>% left_join(migration_wide,
                              by = "county_state") %>% 
   filter(foreign_prop != "NA")
+
+measles_county_migration %>% 
+  ggplot(aes(x = foreign_prop,
+             y = mmr)) + 
+  geom_point() +
+  geom_smooth(method = "lm",
+              se = FALSE) +
+  theme_bw()
+
+# measles_county_migration %>% filter(foreign_prop > 0.05) %>% 
+#   ggplot(aes(x = state,
+#                                         y = mmr)) + 
+#   geom_boxplot(outlier.shape = NA) +
+#   geom_point(aes(color = total_foreign_born,
+#                  alpha = 0.3)) +
+#   scale_color_viridis() +
+#   ylim(60,100)
 ```
+
+To determine whether there are associations between MMR vaccination rates and the proportion of foreign born populations, a scatterplot is utilised. This is reflected in Figure \@ref(fig:migration-measles) where MMR vaccination rates are plotted in the y-axis, and the proportions are plotted in the x-axis; both variables are summarised at county level. The figure suggests that there is no strong associations between the two variables. The regression line in the plot, nevertheless, indicates that there might be a positive linear relationship between the variables. This means that the MMR vaccination rates may increase as the proportion of foreign born population increases in the county. 
 
 ## Education
 
