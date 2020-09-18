@@ -569,13 +569,7 @@ while Maine that has the highest proportion of population of high school and bac
 GGally::ggpairs(measles_education_wide,columns = 2:3)
 ```
 
-<<<<<<< HEAD
-Base on the analysis **Figure\@ref(fig:corrlationofmmreducation)**. We can see that the MMR Vaccination Rates and educational level has weak relationship. 0.283 is a weak postive relationship. So, we can know that, the MMR vaccination has no significant relationship with educational. On the other hand, it has a lot to do with people's consciousness.People with low levels of education are also to be vaccination. 
-
-On the reserch of Mora(The influence of education on the access to childhood immunization),they has some oppinion.The greater educational attainment level, the higher the probability of being vaccinated in this immunization programme. The presence of an age profile for vaccinations showed that less educated parents visit their GPs more frequently for immunizations when their children are below the age of six, but that pattern is completely the opposite after that age. Hence, for children aged between six and 16, more educated parents are more likely to ensure their children are immunized. Likewise, systematic vaccinations are more likely for those parents with a lower educational attainment level. [@Mora2018]
-=======
-Figure \@ref(fig:corrlationofmmreducation) shows that MMR vaccination rates and educational attainment level has weak positive relationship. This suggests that while better education level may suggests better MMR vaccination rates, it is not a strong indicator [@Mora2018].
->>>>>>> jeffendy
+Figure \@ref(fig:corrlationofmmreducation) shows that MMR vaccination rates and educational attainment level has weak positive relationship. This suggests that while better education level may suggests better MMR vaccination rates, it is not a strong indicator. It is aligned with a study conducted by Mora and Trapero-Bertran [-@Mora2018] where they suggest that individuals with better educational attainment elvel are likely to be vaccinated.
 
 # Conclusion
 
