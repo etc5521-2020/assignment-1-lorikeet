@@ -518,7 +518,13 @@ measles_county_migration %>%
 
 To determine whether there are associations between MMR vaccination rates and the proportion of foreign born populations, a scatterplot is utilised. This is reflected in Figure \@ref(fig:migration-measles) where MMR vaccination rates are plotted in the y-axis, and the proportions are plotted in the x-axis; both variables are summarised at county level. The figure suggests that there is no strong associations between the two variables. The regression line in the plot, nevertheless, indicates that there might be a positive linear relationship between the variables. This means that the MMR vaccination rates may increase as the proportion of foreign born population increases in the county. 
 
-## Education
+But we found is not aligned with the general research on the net.base on the research(Adult vaccination disparities among foreign born populations in the United States, 2012).The report say that Vaccination coverage was lower among foreign born adults than those born in the U.S. Vaccination coverage varied by immigration status, citizenship, language, and demographic characteristics. As the number of foreign born persons residing in the United States increases, it is important to consider foreign birth and immigration status when assessing vaccination disparities and planning interventions.@Lu2014Dec
+
+So,we need to put for focus on the foreign born people's health and vaccination.
+
+
+
+## The relationship between MMR vaccination and education level.
 
 ```{r education-data}
 educational_attainment$variable_description <- as.factor(educational_attainment$variable_description)
@@ -550,9 +556,6 @@ measles_education_wide <- measles_education %>%
 ```
 
 
-The _educational_level_ which is combine with _high_school_graduates_ and _bachelor_degree_,which can represent the educational level of a state. As we can see from the **Figure\@ref(fig:mmrvseduplot)**, we can know that the top of MMR vaccination Rates is state Illinois,which is 97.62% MMR Vaccination Rate. And the top of educational_level is Maine,which is 38.18% people accept the education.but the highest level of education can not represent the highest MMR Vaccination Rates. Only 92.24% MMR Vaccination Rate in Maine(the Highest level education state.)On the other hand, the highest MMR Vaccination Rates state is Illinois,which has 33.81% people accept the high level education. It s only in the middle of the pack.
-
-
 ```{r,mmrvseduplot, fig.cap="mmr vs education",fig.align = "center"}
 measles_education_wide%>%
    plot_ly(y = ~ state, 
@@ -575,14 +578,15 @@ measles_education_wide%>%
 
 ```
 
+The _educational_level_ which is combine with _high_school_graduates_ and _bachelor_degree_,which can represent the educational level of a state. As we can see from the **Figure\@ref(fig:mmrvseduplot)**, we can know that the top of MMR vaccination Rates is state Illinois,which is 97.62% MMR Vaccination Rate. And the top of educational_level is Maine,which is 38.18% people accept the education.but the highest level of education can not represent the highest MMR Vaccination Rates. Only 92.24% MMR Vaccination Rate in Maine(the Highest level education state.)On the other hand, the highest MMR Vaccination Rates state is Illinois,which has 33.81% people accept the high level education. It s only in the middle of the pack.
 
-```{r}
+```{r,corrlationofmmreducation, fig.cap="mmreducorrlation",fig.align = "center"}
 GGally::ggpairs(measles_education_wide,columns = 2:3)
 ```
 
 Base on the analysis**Figure\@ref(fig:corrlationofmmreducation)**. We can see that the MMR Vaccination Rates and educational level has weak relationalship. 0.283 is a weak postive relationship. So, we can know that, the MMR vaccination has no significant relationship with educational. On the other hand, it has a lot to do with people's consciousness.People with low levels of education are also to be vaccination. 
 
-The greater educational attainment level, the higher the probability of being vaccinated in this immunization programme. The presence of an age profile for vaccinations showed that less educated parents visit their GPs more frequently for immunizations when their children are below the age of six, but that pattern is completely the opposite after that age. Hence, for children aged between six and 16, more educated parents are more likely to ensure their children are immunized. Likewise, systematic vaccinations are more likely for those parents with a lower educational attainment level.@Mora2018
+On the reserch of Mora(The influence of education on the access to childhood immunization),they has some oppinion.The greater educational attainment level, the higher the probability of being vaccinated in this immunization programme. The presence of an age profile for vaccinations showed that less educated parents visit their GPs more frequently for immunizations when their children are below the age of six, but that pattern is completely the opposite after that age. Hence, for children aged between six and 16, more educated parents are more likely to ensure their children are immunized. Likewise, systematic vaccinations are more likely for those parents with a lower educational attainment level.@Mora2018
 
 # Conclusion
 
