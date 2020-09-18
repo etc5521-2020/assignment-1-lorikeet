@@ -338,7 +338,7 @@ The proportion of schools with less than 95% MMR vaccination rates are reflected
 
 ## Does Higher Income Per Capita Lead to Higher MMR Vaccination Rates?
 
-To analyse the average income of the states with the highest and lowest vaccination rate, an external dataset from U.S. Census Bureau was retrieved. This data was merged with the measles data grouped by state, and the top and bottom five observations were tabulated for both the vaccination rates.
+To analyse the average income of the states with the highest and lowest vaccination rate, an external dataset from U.S. Census Bureau was retrieved. This data was merged with the measles data grouped by state, and the top and bottom five observations were tabulated for both the vaccination rates. Finally, income quantiles for each states are determined; with states in quantile 1 are states with lowest income per capita, and those in quantile 4 have highest income per capita.
 
 ```{r measles-density-income}
 # Measles vaccination across all American states and school count
@@ -406,9 +406,11 @@ measles_state_income %>%
   kable_styling()
 ```
 
-Table \@ref(tab:best-mmr) shows the top five states, with their respective income per capita, that have the highest rate of MMR vaccinations. The schools with the highest MMR vaccination rates are based on states with various level of income per capita. It ranges from USD 28,105 to USD 41,021. The table also highlights that on average, schools that have highest MMR vaccination rates are based on states with high and medium level of income per capita (quantile 2 and 4).
+Table \@ref(tab:best-mmr) shows the top five states, with their respective income per capita, that have the highest rate of MMR vaccinations. These schools are based in states with varying level of income per capita. It ranges from USD 28,105 to USD 41,021. The table also highlights that on average, schools that have highest MMR vaccination rates are based on states with high and medium level of income per capita (quantile 2 and 4).
 
 Table \@ref(tab:worst-mmr), on the other hand, shows the top five states that have the lowest rates of MMR vaccination. Similar to the previous table, these schools are based states with varying level of income per capita. The states with the highest income quantile, however, do not have the lowest MMR vaccination rate.
+
+It can be argued from these two tables that income per capita is not a good indicator for MMR vaccination rates.
 
 ```{r income-plot, fig.cap="Scatter plot of School's MMR Vaccination Rates by Income Per Capita", fig.align="center"}
 measles_county_income$quartile <- as.factor(measles_county_income$quartile)
@@ -422,27 +424,34 @@ measles_county_income %>%
   geom_smooth(method = lm, se = FALSE) +
   ylim(60,100) +
   facet_wrap(~state) +
+  xlab("Income Per Capita") +
+  ylab("MMR Vaccination Rates") +
+  ggtitle("Relationships between MMR Vaccination Rates and Income Per Capita",
+          subtitle = "The relationship differs across states") +
   scale_color_discrete_qualitative() + 
   guides(color = FALSE) +
   theme_bw()
 ```
 
 ```{r income-box, fig.cap="Box plot of School's MMR Vaccination Rates by Income Quantiles", fig.align="center"}
-measles_county_income %>% #group_by(quartile) %>% 
-  #summarise(mmr = mean(mmr)) %>% 
+measles_county_income %>%
   ggplot(aes(x = quartile,
              y = mmr,
              fill = quartile)) +
   geom_boxplot() +
   geom_hline(yintercept = median(measles_county_income$mmr),
              color = "red") +
+  ylim(60,NA) +
+  xlab("Income Quantiles") +
+  ylab("MMR Vaccination Rates") +
+  ggtitle("Distributions of MMR Vaccination Rates Across Income Quantiles",
+          subtitle = "The median of vaccination rates decreases as income quantile increases") +
   theme_bw()
 ```
 
 Figure \@ref(fig:income-plot) reflects that income per capita have varying effect to MMR vaccination rates across different states. While linear association can be easily determined in some of the states, the relationship of the two variables are difficult to ascertain in most of the states. 
 
-The distribution of MMR vaccination rates across the different income quantiles are plotted in Figure \@ref(fig:income-box). The highest MMR vaccination rates occur in schools that are based on the lowest income quantile. The figure suggests that the vaccination rates are lower for schools that are based on highest income quantile. However, with the exception of quantile 1, the difference in the average (median) of the rates are small across the different income quantile.
-
+The distribution of MMR vaccination rates across the different income quantiles are plotted in Figure \@ref(fig:income-box). The highest MMR vaccination rates occur in schools that are based on the lowest income quantile. The figure suggests that higher income per capita does not lead to higher MMR vaccination rates.
 
 ## Are MMR Vaccination Rates Lower in Areas with Higher Proportion of Foreign Born Population?
 
@@ -471,7 +480,11 @@ migration_plot <- migration_wide %>% group_by(state) %>%
                color = "grey") +
   geom_point(color = "orange", size = 2) +
   theme_bw() +
-  coord_flip()
+  coord_flip() +
+  xlab("Proportion of Population that is Foreign Born") +
+  ylab("States") +
+  ggtitle("Distributions of Proportion Foreign Born Population across States",
+          subtitle = "The maximum foreign born population proportion is 17%")
 
 migration_plot
 ```
@@ -490,15 +503,14 @@ measles_county_migration %>%
   geom_point() +
   geom_smooth(method = "lm",
               se = FALSE) +
+  xlab("Proportion of Population that is Foreign Born") +
+  ylab("MMR Vaccination Rates") +
+  ggtitle("Relationship Between Proportion Foreign Born Population and MMR Vaccination Rates",
+          subtitle = "There is no clear association between the two variables") +
   theme_bw()
 ```
 
-To determine whether there are associations between MMR vaccination rates and the proportion of foreign born populations, a scatterplot is utilised. This is reflected in Figure \@ref(fig:migration-measles) where MMR vaccination rates are plotted in the y-axis, and the proportions are plotted in the x-axis; both variables are summarised at county level. The figure suggests that there is no strong associations between the two variables. The regression line in the plot, nevertheless, indicates that there might be a positive linear relationship between the variables. This means that the MMR vaccination rates may increase as the proportion of foreign born population increases in the county. 
-
-But we found is not aligned with the general research on the net.base on the research(Adult vaccination disparities among foreign born populations in the United States, 2012).The report say that Vaccination coverage was lower among foreign born adults than those born in the U.S. Vaccination coverage varied by immigration status, citizenship, language, and demographic characteristics. As the number of foreign born persons residing in the United States increases, it is important to consider foreign birth and immigration status when assessing vaccination disparities and planning interventions.@Lu2014Dec
-
-So,we need to put for focus on the foreign born people's health and vaccination.
-
+To determine whether there are associations between MMR vaccination rates and the proportion of foreign born populations, a scatterplot is utilised. This is reflected in Figure \@ref(fig:migration-measles) where MMR vaccination rates are plotted in the y-axis, and the proportions are plotted in the x-axis; both variables are summarised at county level. The figure suggests that there is no strong associations between the two variables. The regression line in the plot, nevertheless, indicates that there may be a weak positive linear relationship between the variables. This means that the MMR vaccination rates may increase as the proportion of foreign born population increases in the county. This, however, is not aligned with the general research that is publicly available. A study found that persons that were born outstide of the U.S. have a high risk of under-vaccinations.
 
 ## Does Regions with Better Educational Attainments Have higher MMR vaccination rates?
 
