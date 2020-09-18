@@ -518,10 +518,9 @@ So,we need to put for focus on the foreign born people's health and vaccination.
 
 
 
-## The relationship between MMR vaccination and education level.
-=======
+
 ## Does Regions with Better Educational Attainments Have higher MMR vaccination rates?
->>>>>>> jeffendy
+
 
 ```{r education-data}
 educational_attainment$variable_description <- as.factor(educational_attainment$variable_description)
@@ -552,10 +551,7 @@ measles_education_wide <- measles_education %>%
  
 ```
 
-<<<<<<< HEAD
 
-=======
->>>>>>> jeffendy
 ```{r,mmrvseduplot, fig.cap="mmr vs education",fig.align = "center"}
 measles_education_wide%>%
    plot_ly(y = ~ state, 
@@ -582,11 +578,8 @@ The _educational_level_ which is combine with _high_school_graduates_ and _bache
 <<<<<<< HEAD
 
 ```{r,corrlationofmmreducation, fig.cap="mmreducorrlation",fig.align = "center"}
-=======
 
 
-```{r corrlationofmmreducation}
->>>>>>> jeffendy
 GGally::ggpairs(measles_education_wide,columns = 2:3)
 ```
 
