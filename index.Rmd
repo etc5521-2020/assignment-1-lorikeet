@@ -25,7 +25,7 @@ bibliography: reference.bib
 knitr::opts_chunk$set(echo = FALSE, 
                       message = FALSE, 
                       warning = FALSE,
-                      cache = TRUE)
+                      cache = FALSE)
 ```
 
 ```{r libraries}
