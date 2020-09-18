@@ -494,10 +494,6 @@ measles_county_migration <- measles_county %>% left_join(migration_wide,
   filter(foreign_prop != "NA")
 ```
 
-```{r label, options}
-
-```
-
 ## Education
 
 ```{r education-data}
