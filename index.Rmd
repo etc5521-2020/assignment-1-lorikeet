@@ -8,8 +8,14 @@ author:
   - Jimmy Effendy
   - DIYAO CHEN
 date: "`r Sys.Date()`"
-output: 
-  bookdown::html_document2
+output:
+  bookdown::html_document2: 
+    citation_package: biblatex
+    number_sections: yes
+    theme: cerulean
+    toc: yes
+    toc_float:
+      collapsed: yes
 bibliography: reference.bib
 ---
 
@@ -18,7 +24,8 @@ bibliography: reference.bib
 ```{r, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, 
                       message = FALSE, 
-                      warning = FALSE)
+                      warning = FALSE,
+                      cache = TRUE)
 ```
 
 ```{r libraries}
@@ -326,7 +333,7 @@ measles_density_95 %>%
              y = reorder(state, below_95_prop))) +
   geom_col(fill = "darkcyan") + 
   geom_vline(xintercept = mean(measles_density_95$below_95_prop),
-             color = "red")
+             color = "red")+
   theme_bw()
 ```
 
