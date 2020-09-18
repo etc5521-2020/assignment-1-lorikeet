@@ -594,10 +594,6 @@ The analysis has revealed that it is likely that there is no association with so
 
 # References
 
-Alboukadel Kassambara (2020). ggpubr: 'ggplot2' Based
-  Publication Ready Plots. R package version 0.4.0.
-  https://CRAN.R-project.org/package=ggpubr
-  
 Barrabeig, I., Rovira, A., Rius, C., Muñoz, P., Soldevila, N., Batalla, J., &
   Domínguez, A. (2011). Effectiveness of measles vaccination for control of exposed children. The
   Pediatric Infectious Disease Journal, 30(1), 78–80.
@@ -610,41 +606,15 @@ Cockcroft, A., Usman, M. U., Nyamucherera, O. F., Emori, H., Duke, B., Umar, N.
   cross-sectional study in two Nigerian States. Archives of Public Health = Archives Belges de Sante
   Publique, 72(1), 48.
 
-Commonwealth of Australia. (2020, May 27). Measles. Retrieved 25 August 2020, from
-  https://www.health.gov.au/health-topics/measles#what-is-measles
-
-Hadley Wickham and Dana Seidel (2020). scales: Scale
-  Functions for Visualization. R package version 1.1.1.
-  https://CRAN.R-project.org/package=scales
-  
 H. Wickham. ggplot2: Elegant Graphics for Data Analysis.
   Springer-Verlag New York, 2016.
   
-Hao Zhu (2019). kableExtra: Construct Complex Table with
-  'kable' and Pipe Syntax. R package version 1.1.0.
-  https://CRAN.R-project.org/package=kableExtra
-  
-Kamil Slowikowski (2020). ggrepel: Automatically Position
-  Non-Overlapping Text Labels with 'ggplot2'. R package version
-  0.8.2. https://CRAN.R-project.org/package=ggrepel
-  
-Mock, T. (2018). TidyTuesday–W weekly social data project in R. URL:
-  https://github. com/rfordatascience/tidytuesday, 3.  
 
-Nicholas Tierney, Di Cook, Miles McBain and Colin Fay (2020).
-  naniar: Data Structures, Summaries, and Visualisations for
-  Missing Data. R package version 0.5.2.
-  https://CRAN.R-project.org/package=naniar  
-  
 Original S code by Richard A. Becker, Allan R. Wilks. R
   version by Ray Brownrigg. Enhancements by Thomas P Minka and
   Alex Deckmyn. (2018). maps: Draw Geographical Maps. R package
   version 3.3.0. https://CRAN.R-project.org/package=maps
 
-Pebesma, E., 2018. Simple Features for R: Standardized
-  Support for Spatial Vector Data. The R Journal 10 (1),
-  439-446, https://doi.org/10.32614/RJ-2018-009  
-  
 Phadke, V. K., Bednarczyk, R. A., Salmon, D. A., & Omer, S. B. (2016). Association Between
   Vaccine Refusal and Vaccine-Preventable Diseases in the United States: A Review of Measles and
   Pertussis. JAMA: The Journal of the American Medical Association, 315(11), 1149–1158. 
@@ -653,10 +623,6 @@ Queensland Health. (2019, October 22). What is measles and why do we vaccinate a
   Retrieved 25 August 2020, from
   https://www.health.qld.gov.au/news-events/news/what-is-measles-why-vaccinate#:~:text=The%20
   easles%20vaccine%20contains%20a,is%20better%20prepared%20to%20respond
-  
-R Core Team (2020). R: A language and environment for
-  statistical computing. R Foundation for Statistical
-  Computing, Vienna, Austria. URL https://www.R-project.org/.
   
 Sinclair, D. R., Grefenstette, J. J., Krauland, M. G., Galloway, D. D., Frankeny, R. J.,
   Travis, C., … Roberts, M. S. (2019). Forecasted Size of Measles Outbreaks Associated With
@@ -671,13 +637,6 @@ Tim Appelhans, Florian Detsch, Christoph Reudenbach and
   Spatial Data in R. R package version 2.9.0.
   https://CRAN.R-project.org/package=mapview  
 
-VanAntwerp, T. (2016). TaxFoundation facts-and-figures. GitHub repository.
-  Retrieved from https://github.com/TaxFoundation/facts-and-figures
-
-Wickham et al., (2019). Welcome to the tidyverse. Journal of
-  Open Source Software, 4(43), 1686,
-  https://doi.org/10.21105/joss.01686
-  
 Yihui Xie (2020). knitr: A General-Purpose Package for
   Dynamic Report Generation in R. R package version 1.29.
 
@@ -689,3 +648,7 @@ Yihui Xie (2020). knitr: A General-Purpose Package for
   Roger D. Peng, editors, Implementing Reproducible
   Computational Research. Chapman and Hall/CRC. ISBN
   978-1466561595
+
+
+@Mora2018 @BibEntry2015Aug @Lu2014Dec @Kassambara2020Sep @BibEntry2020May @BibEntry2020Sep @Zhu2020Sep @Slowikowski2020Mar @rfordatascience2020Sep
+@Pebesma2018 @BibEntry2020Jun @TaxFoundation2020Sep @Wickham2019Nov @
